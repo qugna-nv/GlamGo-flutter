@@ -1,8 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:project_shop/gen/assets.gen.dart';
 import 'package:project_shop/gen/colors.gen.dart';
+import 'package:project_shop/widgets/button/favorite_button_widget.dart';
 
 class ProductsImageWidget extends StatelessWidget {
   const ProductsImageWidget({
@@ -70,35 +70,11 @@ class ProductsImageWidget extends StatelessWidget {
         Positioned(
           top: 8,
           right: 8,
-          child: GestureDetector(
-            // rippleColor: Colors.amber,
-            onTap: onTap,
-            child: Container(
-              width: iconSize ?? 40,
-              height: iconSize ?? 40,
-              padding: EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: bgrColor ?? ColorName.white,
-                borderRadius: BorderRadius.circular(55),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 2,
-                    blurRadius: 4,
-                    offset: Offset(1, 3),
-                  ),
-                ],
-              ),
-              child: isWishList
-                  ? Image.asset(
-                      Assets.images.icHeartFill.path,
-                      color: colorIcon ?? ColorName.red5,
-                    )
-                  : Image.asset(
-                      Assets.images.icHeart.path,
-                    ),
-            ),
-          ),
+          child: FavoriteButton(
+              isFavorite: isWishList,
+              onTap: () {
+                if (onTap != null) onTap!();
+              }),
         ),
       ],
     );

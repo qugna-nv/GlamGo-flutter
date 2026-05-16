@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:project_shop/base/app_exception.dart';
 import 'package:project_shop/base/base_controller.dart';
 import 'package:project_shop/data/repository/categories_action/categories_repository.dart';
+import 'package:project_shop/data/repository/products_action/products_repository.dart';
 import 'package:project_shop/data/response_models/products/product_attribute_model.dart';
 import 'package:project_shop/data/response_models/products/products_model.dart';
 import 'package:project_shop/features/wishlist/wish_list_controller.dart';
@@ -19,6 +20,7 @@ class ProductDetailController extends BaseController {
   ].obs;
 
   final _categoriesRepository = Get.find<CategoriesRepository>();
+  final _productsRepository = Get.find<ProductsRepository>();
 
   final RxInt selectedIndex = 0.obs;
 
@@ -78,7 +80,7 @@ class ProductDetailController extends BaseController {
   Future<void> getProductDetail(int? productId) async {
     try {
       isLoading.value = true;
-      final response = await _categoriesRepository.getProductDetail(productId);
+      final response = await _productsRepository.getProductDetail(productId);
       response.fold(
         (error) {
           appException.value = error;

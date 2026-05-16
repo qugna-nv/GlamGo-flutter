@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "287744855030",
+    "project_id": "glamgo-4cb97",
+    "storage_bucket": "glamgo-4cb97.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:287744855030:android:80b9fec37a3531a57415d7",
+        "android_client_info": {
+          "package_name": "com.example.project_shop"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgi_RfCKNxmM9joPxCskJLQV2zCzkuTTA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

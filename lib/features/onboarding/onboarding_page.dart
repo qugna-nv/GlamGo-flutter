@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:project_shop/features/onboarding/onboarding_controller.dart';
 import 'package:project_shop/gen/assets.gen.dart';
@@ -20,9 +21,26 @@ class OnboardingScreen extends GetView<OnboardingController> {
                 controller: controller.pageController,
                 onPageChanged: controller.onChangePage,
                 children: [
-                  OnboardingPage(),
-                  OnboardingPage(image: Assets.images.initCarousel.path),
-                  OnboardingPage(),
+                  OnboardingPage(
+                    title: 'Chào mừng đến với ShopStyle',
+                    image: Assets.images.onboarding1.path,
+                    describe:
+                        'Khám phá hàng ngàn sản phẩm thời trang xu hướng mới nhất',
+                  ),
+                  OnboardingPage(
+                    image: Assets.images.onboarding2.path,
+                    title: 'Lọc và tìm kiếm thông minh',
+                    describe:
+                        'Dễ dàng tìm thấy món đồ yêu thích của bạn với bộ lọc đa dạng',
+                    topShapeColor: ColorName.orange13.withAlpha(80),
+                    bottomShapeColor: ColorName.orangeChart.withAlpha(80),
+                  ),
+                  OnboardingPage(
+                    image: Assets.images.onboarding3.path,
+                    title: 'Thanh toán Nhanh chóng & Bảo mật',
+                    describe:
+                        'Mua sắm an toàn với nhiều phương thức thanh toán linh hoạt và bảo mật',
+                  ),
                 ],
               ),
               Positioned(
@@ -107,36 +125,80 @@ class OnboardingPage extends StatelessWidget {
     this.image,
     this.title,
     this.describe,
+    this.topShapeColor = const Color(0xFFE3EDFB),
+    this.bottomShapeColor = const Color(0xFFE3EDFB),
   });
 
   final String? title, describe, image;
+  final Color topShapeColor;
+  final Color bottomShapeColor;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 50),
-      child: Column(
+    return Scaffold(
+      backgroundColor: Color.fromARGB(255, 245, 250, 255),
+      body: Stack(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: Image.asset(
-              image ?? Assets.images.introImage.path,
-              width: Get.width * 0.9,
-              height: Get.height * 0.6,
-              fit: BoxFit.contain,
+          Positioned(
+            top: -Get.height * 0.1,
+            right: -Get.width * 0.2,
+            child: Container(
+              width: Get.width * 0.6,
+              height: Get.width * 0.6,
+              decoration: BoxDecoration(
+                color: topShapeColor,
+                shape: BoxShape.circle,
+              ),
             ),
           ),
-          SizedBox(height: 8),
-          Text(
-            "Discovery Trends",
-            style: Styles.bigTextW700(),
+          Positioned(
+            bottom: -Get.height * 0.15,
+            left: -Get.width * 0.2,
+            child: Container(
+              width: Get.width * 0.8,
+              height: Get.width * 1.2,
+              decoration: BoxDecoration(
+                color: bottomShapeColor,
+                shape: BoxShape.circle,
+              ),
+            ),
           ),
-          SizedBox(height: 8),
-          Text(
-            "Now we are here to provider variety of the best fashion",
-            style: Styles.normalTextW500(),
-            textAlign: TextAlign.center,
-          )
+          SafeArea(
+            child: Column(
+              children: [
+                SizedBox(height: Get.height * 0.08),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Image.asset(
+                    image ?? Assets.images.introImage.path,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        title ?? "Chào mừng đến ShopStyle!",
+                        style: Styles.bigText().copyWith(
+                            fontSize: 28.sp, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        describe ??
+                            "Khám phá hàng ngàn sản phẩm thời trang xu hướng mới nhất.",
+                        style: Styles.normalTextW400(size: 16.sp),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 40),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

@@ -41,6 +41,9 @@ ProductsModel _$ProductsModelFromJson(Map<String, dynamic> json) =>
           ?.map(
               (e) => ProductAttributeModel.fromJson(e as Map<String, dynamic>))
           .toList(),
+      sameCategory: (json['sameCategory'] as List<dynamic>?)
+          ?.map((e) => SameCategoryModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$ProductsModelToJson(ProductsModel instance) =>
@@ -67,6 +70,7 @@ Map<String, dynamic> _$ProductsModelToJson(ProductsModel instance) =>
       'category': instance.category,
       'product_images': instance.productImages,
       'attribute': instance.attribute,
+      'sameCategory': instance.sameCategory,
     };
 
 ProductImage _$ProductImageFromJson(Map<String, dynamic> json) => ProductImage(

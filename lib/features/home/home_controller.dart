@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:project_shop/base/app_exception.dart';
 import 'package:project_shop/base/base_controller.dart';
 import 'package:project_shop/data/repository/categories_action/categories_repository.dart';
+import 'package:project_shop/data/repository/products_action/products_repository.dart';
 import 'package:project_shop/data/response_models/categories/category_model.dart';
 import 'package:project_shop/data/response_models/products/products_model.dart';
 import 'package:project_shop/data/secure_storage/share_preference_manager.dart';
@@ -18,6 +19,8 @@ class HomeController extends BaseController {
   get currentIndex => _currentIndex.value;
 
   final _categoriesRepository = Get.find<CategoriesRepository>();
+
+  final _productsRepository = Get.find<ProductsRepository>();
 
   final WishListController wishListController = Get.find();
 
@@ -93,7 +96,7 @@ class HomeController extends BaseController {
   Future<void> getBanner() async {
     try {
       // _listBanner.clear();
-      final response = await _categoriesRepository.getBanner();
+      final response = await _productsRepository.getBanner();
       response.fold(
         (error) async {
           appException.value = error;
@@ -139,7 +142,7 @@ class HomeController extends BaseController {
   Future<void> getProducts() async {
     _isLoadingProduct.value = true;
     try {
-      final response = await _categoriesRepository.getProducts();
+      final response = await _productsRepository.getProducts();
       response.fold(
         (error) {
           appException.value = error;
@@ -158,12 +161,6 @@ class HomeController extends BaseController {
   }
 
   Future<void> getProductsByCategory(int? categoryId) async {
-    //phân trang
-    //   final hasCache = _productsCacheByCategoryAndPage[categoryId]?[page];
-    // if (hasCache != null) {
-    //   _productsByCategory.assignAll(hasCache);
-    //   return;
-    // }
     if (categoryId != null &&
         _productsCacheByCategory.containsKey(categoryId) &&
         _productsCacheByCategory[categoryId]!.isNotEmpty) {
@@ -175,7 +172,7 @@ class HomeController extends BaseController {
     _isLoadingProductByCa.value = true;
     try {
       final response =
-          await _categoriesRepository.getProductsByCategory(categoryId);
+          await _productsRepository.getProductsByCategory(categoryId);
       response.fold(
         (error) {
           appException.value = error;

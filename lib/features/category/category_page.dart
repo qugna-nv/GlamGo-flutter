@@ -67,35 +67,36 @@ class CategoryPage extends GetView<CategoryController> {
                         return Center(child: Text('Không có sản phẩm nào'));
                       }
                       return Expanded(
-                        child: Obx(() => GridView.builder(
-                              itemCount:
-                                  controller.listDisplayedProducts.length,
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                childAspectRatio: 1,
-                                crossAxisSpacing: 8,
-                                mainAxisSpacing: 8,
-                                mainAxisExtent: 250,
-                              ),
-                              itemBuilder: (context, index) {
-                                final products =
-                                    controller.listDisplayedProducts[index];
-                                return Obx(() {
-                                  return ProductsItemView(
-                                    name: products.name,
-                                    path: Utils.I
-                                        .getImageFullPath(products.image ?? ''),
-                                    price: products.price.toString(),
-                                    priceSale: products.priceSale.toString(),
-                                    onTap: () => controller.wishListController
-                                        .toggleFavorite(products),
-                                    isWishList: controller.wishListController
-                                        .isFavorite(products),
-                                  );
-                                });
-                              },
-                            )),
+                        child: Obx(
+                          () => GridView.builder(
+                            itemCount: controller.listDisplayedProducts.length,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 1,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
+                              mainAxisExtent: 330,
+                            ),
+                            itemBuilder: (context, index) {
+                              final products =
+                                  controller.listDisplayedProducts[index];
+                              return Obx(() {
+                                return ProductsItemView(
+                                  name: products.name,
+                                  path: Utils.I
+                                      .getImageFullPath(products.image ?? ''),
+                                  price: products.price.toString(),
+                                  priceSale: products.priceSale.toString(),
+                                  onTap: () => controller.wishListController
+                                      .toggleFavorite(products),
+                                  isWishList: controller.wishListController
+                                      .isFavorite(products),
+                                );
+                              });
+                            },
+                          ),
+                        ),
                       );
                     },
                   ),

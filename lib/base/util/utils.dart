@@ -20,4 +20,12 @@ class Utils {
     final formatter = NumberFormat("#,###", "vi_VN");
     return "${formatter.format(amount)} đ";
   }
+
+  String formatBulletText(String text) {
+    return text.split('\n').map((line) {
+      final trimmed = line.trim();
+      if (trimmed.isEmpty) return '';
+      return '  - $trimmed'; // 2 space để lùi vào
+    }).join('\n');
+  }
 }

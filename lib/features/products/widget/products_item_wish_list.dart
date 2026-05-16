@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:project_shop/gen/assets.gen.dart';
@@ -6,6 +7,7 @@ import 'package:project_shop/gen/colors.gen.dart';
 import 'package:project_shop/widgets/icon_widget/icon_widget.dart';
 import 'package:project_shop/widgets/image_base/products_image_widget.dart';
 import 'package:project_shop/widgets/inkwell/default_ink_well.dart';
+import 'package:project_shop/widgets/quantity_selector_widget.dart';
 import 'package:project_shop/widgets/simple_rows/simple_row_content.dart';
 import 'package:project_shop/widgets/simple_rows/simple_row_widget.dart';
 import 'package:project_shop/widgets/styles_widget/styles_widget.dart';
@@ -21,6 +23,7 @@ class ProductsItemWishlist extends StatelessWidget {
     this.onTap,
     this.onWishListProduct,
     this.isWishList = false,
+    this.ratting,
   });
 
   final bool isItemWishList;
@@ -29,6 +32,7 @@ class ProductsItemWishlist extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onWishListProduct;
   final bool isWishList;
+  final double? ratting;
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +85,8 @@ class ProductsItemWishlist extends StatelessWidget {
                       SizedBox(height: 12),
                       // SimpleRowWidget(
                       //   isWidthSizeBox: 0,
-                      //   padding: EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+                      //   padding:
+                      //       EdgeInsets.symmetric(vertical: 0, horizontal: 0),
                       //   // textAlign: TextAlign.start,
                       //   isShowWidget: true,
                       //   imageFirst: Assets.icons.icDelete,
@@ -131,27 +136,30 @@ class ProductsItemWishlist extends StatelessWidget {
                         ),
                         contentSecond: '',
                       ),
-                      // SizedBox(height: 8),
-                      SimpleRowWidget(
-                        padding: EdgeInsets.symmetric(vertical: 4),
-                        imageFirst: Assets.icons.icStar,
-                        contentFirst: starCount ?? '3.5',
-                        isShowWidget: false,
-                        isWidthSizeBox: 8,
-                        color: ColorName.yellow5,
-                        iconSize: 20,
+                      SizedBox(height: 8),
+                      RatingBarIndicator(
+                        rating: ratting ?? 4.5,
+                        itemBuilder: (context, index) => Icon(
+                          Icons.star,
+                          color: Colors.amber,
+                        ),
+                        itemCount: 5,
+                        itemSize: 20.0,
+                        direction: Axis.horizontal,
                       ),
                       Text(
-                        describe ??
-                            'Giúp tôi sửa đoạn văn trên, giữ nguyên nội dung nhé',
+                        describe ?? 'Size: M, Color: Black, Material: Cotton',
+                        style: Styles.normalText(size: 10),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        describe ?? '500.000đ',
                         style: Styles.normalText(size: 14),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: 8),
-                      SimpleRowContent(
-                        widthSizeBox: 20,
-                      ),
+                      QuantitySelectorWidget(onAdd: () {}, onRemove: () {}),
                     ],
                   ),
           )

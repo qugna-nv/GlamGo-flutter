@@ -78,6 +78,7 @@ class DefaultTextField extends StatelessWidget {
     this.fillColor,
     this.backgroundColor,
     this.isFloatLabel = true,
+    this.textAlign = TextAlign.start,
   });
 
   // final double height;
@@ -175,6 +176,8 @@ class DefaultTextField extends StatelessWidget {
   final Color? backgroundColor;
   final bool isFloatLabel;
 
+  final TextAlign textAlign;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -224,6 +227,7 @@ class DefaultTextField extends StatelessWidget {
             maxLines: maxLines,
             keyboardType: keyboardType,
             autovalidateMode: autovalidateMode,
+            textAlign: textAlign,
             decoration: inputDecoration?.copyWith(
                     filled: filled,
                     fillColor: fillColor ?? Colors.white,
@@ -271,7 +275,8 @@ class DefaultTextField extends StatelessWidget {
             style: boldContent == true
                 ? Styles.normalTextW600(size: 16.sp, color: ColorName.black)
                 : style ??
-                    Styles.normalTextW600(color: ColorName.primaryLightTextColor)
+                    Styles.normalTextW600(
+                            color: ColorName.primaryLightTextColor)
                         .copyWith(
                       fontWeight: FontWeight.w600,
                     ),

@@ -90,7 +90,7 @@ class HomePage extends GetView<HomeController> {
                             childAspectRatio: 1,
                             crossAxisSpacing: 8,
                             mainAxisSpacing: 8,
-                            mainAxisExtent: 250,
+                            mainAxisExtent: 330,
                           ),
                           itemBuilder: (context, index) {
                             final products =

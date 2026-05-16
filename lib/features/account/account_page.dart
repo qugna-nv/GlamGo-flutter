@@ -141,7 +141,9 @@ class AccountPage extends StatelessWidget {
           SimpleRowWidget(
             padding: EdgeInsets.symmetric(vertical: 12, horizontal: 4),
             contentFirst: 'Feedbcak'.tr,
-            onTap: () {},
+            onTap: () {
+              Get.toNamed(Routes.login);
+            },
             imageFirst: Assets.icons.icSend,
           ),
           // SimpleRowWidget(

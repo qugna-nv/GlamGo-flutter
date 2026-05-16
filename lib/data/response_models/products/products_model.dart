@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:project_shop/data/response_models/categories/category_model.dart';
+import 'package:project_shop/data/response_models/categories/same_category_model.dart';
 import 'package:project_shop/data/response_models/products/product_attribute_model.dart';
 
 part 'products_model.g.dart';
@@ -44,7 +45,7 @@ class ProductsModel {
   final String? attributeDescription;
 
   final String? hashtag;
-  
+
   final String? image;
 
   @JsonKey(name: 'image_alt')
@@ -67,6 +68,9 @@ class ProductsModel {
   final List<ProductImage>? productImages;
 
   final List<ProductAttributeModel>? attribute;
+
+  @JsonKey(name: 'sameCategory')
+  final List<SameCategoryModel>? sameCategory;
 
   ProductsModel({
     this.id,
@@ -91,6 +95,7 @@ class ProductsModel {
     this.category,
     this.productImages,
     this.attribute,
+    this.sameCategory,
   });
 
   factory ProductsModel.fromJson(Map<String, dynamic> json) =>

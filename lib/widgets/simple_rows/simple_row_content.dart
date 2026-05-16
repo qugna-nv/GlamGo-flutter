@@ -18,6 +18,7 @@ class SimpleRowContent extends StatelessWidget {
     this.widthSizeBox,
     this.widget,
     this.isShowWidget = true,
+    this.maxLines = 1,
   });
 
   final MainAxisAlignment? mainAxisAlignment;
@@ -29,6 +30,7 @@ class SimpleRowContent extends StatelessWidget {
   final double? widthSizeBox;
   final Widget? widget;
   final bool isShowWidget;
+  final int? maxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +45,7 @@ class SimpleRowContent extends StatelessWidget {
                 contentFirst ?? '--',
                 style: firstStyle ?? Styles.normalTextBold(size: 16),
                 overflow: firstTextOverflow ?? TextOverflow.ellipsis,
+                maxLines: maxLines,
               ),
             ),
             SizedBox(

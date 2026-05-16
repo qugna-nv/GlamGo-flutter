@@ -8,9 +8,11 @@ import 'package:project_shop/features/products/products_detail/widget/item_simil
 import 'package:project_shop/gen/assets.gen.dart';
 import 'package:project_shop/gen/colors.gen.dart';
 import 'package:project_shop/widgets/appbar_custom/custom_app_bar.dart';
+import 'package:project_shop/widgets/button/favorite_button_widget.dart';
 import 'package:project_shop/widgets/button/normal_button.dart';
 import 'package:project_shop/widgets/icon_widget/icon_widget.dart';
 import 'package:project_shop/widgets/image_base/base_image_widget.dart';
+import 'package:project_shop/widgets/shimmer/shimmer_product_detail.dart';
 import 'package:project_shop/widgets/simple_rows/simple_row_content.dart';
 import 'package:project_shop/widgets/styles_widget/styles_widget.dart';
 import 'package:readmore/readmore.dart';
@@ -33,12 +35,12 @@ class ProductDetailPage extends GetView<ProductDetailController> {
                 ],
               ),
             ),
-            body: controller.isLoading.value
-                ? CircularProgressIndicator()
-                : SingleChildScrollView(
-                    padding: EdgeInsets.fromLTRB(6, 0, 6, 60),
-                    child: Obx(() {
-                      return Column(
+            body: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(6, 0, 6, 60),
+              child: Obx(() {
+                return controller.isLoading.value
+                    ? ShimmerProductDetail()
+                    : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Stack(
@@ -155,89 +157,58 @@ class ProductDetailPage extends GetView<ProductDetailController> {
                               Positioned(
                                 top: 8,
                                 right: 8,
-                                child: GestureDetector(
-                                    onTap: () {
-                                      controller.wishListController
-                                          .toggleFavorite(
-                                              controller.productDetail!);
-                                    },
-                                    child: Container(
-                                      padding: EdgeInsets.all(6),
-                                      width: 40,
-                                      height: 40,
-                                      decoration: BoxDecoration(
-                                        color: ColorName.white,
-                                        borderRadius: BorderRadius.circular(55),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.grey.withOpacity(0.5),
-                                            spreadRadius: 2,
-                                            blurRadius: 4,
-                                            offset: Offset(1, 3),
-                                          ),
-                                        ],
-                                      ),
-                                      child: controller.wishListController
-                                              .isFavorite(
-                                                  controller.productDetail)
-                                          ? Image.asset(
-                                              Assets.images.icHeartFill.path,
-                                              color: ColorName.red5)
-                                          : Image.asset(
-                                              Assets.images.icHeart.path),
-                                    )),
+                                child: FavoriteButton(
+                                  isFavorite: controller.wishListController
+                                      .isFavorite(controller.productDetail),
+                                  onTap: () => controller.wishListController
+                                      .toggleFavorite(
+                                          controller.productDetail!),
+                                ),
                               )
                             ],
                           ),
                           const SizedBox(height: 50),
-                          SimpleRowContent(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            contentFirst:
-                                controller.productDetail?.name ?? 'N/A',
-                            firstStyle: Styles.normalTextW800(size: 18),
-                            isShowWidget: false,
+                          Text(
+                            controller.productDetail?.name ?? 'N/A',
+                            style: Styles.normalTextW800(size: 18),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                           SizedBox(height: 8),
                           SimpleRowContent(
                             mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             contentFirst: Utils.I.formatCurrency(
                                 controller.productDetail?.price ?? 0.0),
-                            firstStyle: Styles.normalTextW700(size: 16),
-                            widthSizeBox: 30,
+                            firstStyle: Styles.normalTextBold(
+                                size: 24, color: ColorName.red14),
+                            widthSizeBox: 20,
                             contentSecond: Utils.I.formatCurrency(
                                 controller.productDetail?.priceSale ?? 0.0),
-                            secondStyle:
-                                Styles.normalTextW600(color: ColorName.grey1)
-                                    .copyWith(
-                                        decoration: TextDecoration.lineThrough,
-                                        decorationColor: ColorName.orange13),
+                            secondStyle: Styles.normalTextW600(
+                                    color: ColorName.grey1, size: 20)
+                                .copyWith(
+                                    decoration: TextDecoration.lineThrough,
+                                    decorationColor: ColorName.grey1),
                           ),
                           SizedBox(height: 8),
                           Text(
-                            'Description',
+                            'Mô tả sản phẩm',
                             style: Styles.normalTextW600(),
                           ),
                           SizedBox(height: 8),
                           ReadMoreText(
-                            controller.productDetail?.metaDescription ??
-                                'Flutter is Google’s mobile UI open source framework to build high-quality native (super fast) interfaces for iOS and Android apps with the unified codebase.',
+                            controller.productDetail?.metaDescription ?? '',
                             trimMode: TrimMode.Line,
                             trimLines: 2,
-                            style: TextStyle(
-                                fontSize: 14.sp, color: ColorName.blue31),
+                            style: Styles.normalText(color: ColorName.blue31),
                             colorClickableText: ColorName.blue31,
-                            trimCollapsedText: 'Show more',
-                            trimExpandedText: 'Show less',
-                            lessStyle: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: ColorName.blue31,
-                            ),
-                            moreStyle: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: ColorName.blue31,
-                            ),
+                            trimCollapsedText: 'Xem thêm',
+                            trimExpandedText: ' Ẩn bớt',
+                            lessStyle:
+                                Styles.normalTextW700(color: ColorName.blue31),
+                            moreStyle:
+                                Styles.normalTextW700(color: ColorName.blue31),
                           ),
                           SizedBox(height: 12),
                           Container(
@@ -247,7 +218,7 @@ class ProductDetailPage extends GetView<ProductDetailController> {
                             child: ListView.separated(
                               shrinkWrap: true,
                               scrollDirection: Axis.horizontal,
-                              itemCount: 8,
+                              itemCount: 3,
                               separatorBuilder: (_, __) =>
                                   const SizedBox(width: 12),
                               itemBuilder: (context, index) {
@@ -261,8 +232,8 @@ class ProductDetailPage extends GetView<ProductDetailController> {
                           ),
                         ],
                       );
-                    }),
-                  ),
+              }),
+            ),
           ),
           Positioned(
             bottom: 6,
@@ -355,7 +326,7 @@ class ProductDetailPage extends GetView<ProductDetailController> {
                     IButton(
                       title: 'Mua ngay',
                       color: ColorName.black,
-                      textStyle: Styles.normalTextW600(color: ColorName.white), 
+                      textStyle: Styles.normalTextW600(color: ColorName.white),
                     ),
                   ],
                 ),

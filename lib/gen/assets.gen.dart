@@ -88,6 +88,9 @@ class $AssetsIconsGen {
   /// File path: assets/icons/ic_remote_table.svg
   String get icRemoteTable => 'assets/icons/ic_remote_table.svg';
 
+  /// File path: assets/icons/ic_send.svg
+  String get icSend => 'assets/icons/ic_send.svg';
+
   /// File path: assets/icons/ic_setting.svg
   String get icSetting => 'assets/icons/ic_setting.svg';
 
@@ -112,46 +115,43 @@ class $AssetsIconsGen {
   /// File path: assets/icons/notify.svg
   String get notify => 'assets/icons/notify.svg';
 
-  /// File path: assets/icons/ic_send.svg
-  String get icSend => 'assets/icons/ic_send.svg';
-
   /// List of all assets
   List<dynamic> get values => [
-        icAddCart,
-        icAddToCart,
-        icArrowRight,
-        icArrowRightNew,
-        icBackgroundLocation,
-        icClear,
-        icClose,
-        icContactBook,
-        icDelete,
-        icDeleteTableV1,
-        icEditDocument,
-        icFailToast,
-        icHeart,
-        icHeartOutlined,
-        icHome,
-        icHomeActive,
-        icHomeOutlined,
-        icInformation,
-        icLeftArrow,
-        icLocation,
-        icLogout,
-        icNotification,
-        icPaper,
-        icPower,
-        icRemoteTable,
-        icSetting,
-        icShoppingBag,
-        icStar,
-        icStore,
-        icSuccessToast,
-        icUser,
-        icWarningToast,
-        notify,
-        icSend
-      ];
+    icAddCart,
+    icAddToCart,
+    icArrowRight,
+    icArrowRightNew,
+    icBackgroundLocation,
+    icClear,
+    icClose,
+    icContactBook,
+    icDelete,
+    icDeleteTableV1,
+    icEditDocument,
+    icFailToast,
+    icHeart,
+    icHeartOutlined,
+    icHome,
+    icHomeActive,
+    icHomeOutlined,
+    icInformation,
+    icLeftArrow,
+    icLocation,
+    icLogout,
+    icNotification,
+    icPaper,
+    icPower,
+    icRemoteTable,
+    icSend,
+    icSetting,
+    icShoppingBag,
+    icStar,
+    icStore,
+    icSuccessToast,
+    icUser,
+    icWarningToast,
+    notify,
+  ];
 }
 
 class $AssetsImagesGen {
@@ -213,29 +213,44 @@ class $AssetsImagesGen {
   AssetGenImage get logoWhite =>
       const AssetGenImage('assets/images/logo_white.png');
 
+  /// File path: assets/images/onboarding1.png
+  AssetGenImage get onboarding1 =>
+      const AssetGenImage('assets/images/onboarding1.png');
+
+  /// File path: assets/images/onboarding2.png
+  AssetGenImage get onboarding2 =>
+      const AssetGenImage('assets/images/onboarding2.png');
+
+  /// File path: assets/images/onboarding3.png
+  AssetGenImage get onboarding3 =>
+      const AssetGenImage('assets/images/onboarding3.png');
+
   /// File path: assets/images/store_logo.png
   AssetGenImage get storeLogo =>
       const AssetGenImage('assets/images/store_logo.png');
 
   /// List of all assets
   List<dynamic> get values => [
-        avatar,
-        banner,
-        biometric,
-        icHeart,
-        icHeartFill,
-        icLocation,
-        imgPlaceholder,
-        initCarousel,
-        introImage,
-        jinStoreLogo,
-        logo,
-        logoGreen,
-        logoIsland,
-        logoOrange,
-        logoWhite,
-        storeLogo,
-      ];
+    avatar,
+    banner,
+    biometric,
+    icHeart,
+    icHeartFill,
+    icLocation,
+    imgPlaceholder,
+    initCarousel,
+    introImage,
+    jinStoreLogo,
+    logo,
+    logoGreen,
+    logoIsland,
+    logoOrange,
+    logoWhite,
+    onboarding1,
+    onboarding2,
+    onboarding3,
+    storeLogo,
+  ];
 }
 
 class Assets {
