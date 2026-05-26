@@ -3,8 +3,12 @@ import 'package:get/get_navigation/src/routes/transitions_type.dart';
 import 'package:project_shop/features/article/article_binding.dart';
 import 'package:project_shop/features/article/article_detail/article_detail_page.dart';
 import 'package:project_shop/features/article/article_page.dart';
+import 'package:project_shop/features/address/address_binding.dart';
+import 'package:project_shop/features/address/address_page.dart';
 import 'package:project_shop/features/cart/cart_binding.dart';
 import 'package:project_shop/features/cart/cart_page.dart';
+import 'package:project_shop/features/checkout/checkout_binding.dart';
+import 'package:project_shop/features/checkout/checkout_page.dart';
 import 'package:project_shop/features/category/category_binding.dart';
 import 'package:project_shop/features/category/category_page.dart';
 import 'package:project_shop/features/home/home_binding.dart';
@@ -15,6 +19,8 @@ import 'package:project_shop/features/navigation/main_screen_binding.dart';
 import 'package:project_shop/features/navigation/main_screen.dart';
 import 'package:project_shop/features/onboarding/onboarding_binding.dart';
 import 'package:project_shop/features/onboarding/onboarding_page.dart';
+import 'package:project_shop/features/order/order_binding.dart';
+import 'package:project_shop/features/order/order_page.dart';
 import 'package:project_shop/features/products/products_detail/product_detail_binding.dart';
 import 'package:project_shop/features/products/products_detail/product_detail_page.dart';
 import 'package:project_shop/features/splash/splash_binding.dart';
@@ -71,6 +77,21 @@ class AppPages {
       // transitionDuration: Duration(seconds: 1),
     ),
     GetPage(
+      name: Routes.checkout,
+      binding: CheckoutBinding(),
+      page: () => const CheckoutPage(),
+    ),
+    GetPage(
+      name: Routes.orders,
+      binding: OrderBinding(),
+      page: () => const OrderPage(),
+    ),
+    GetPage(
+      name: Routes.addresses,
+      binding: AddressBinding(),
+      page: () => const AddressPage(),
+    ),
+    GetPage(
       name: Routes.categories,
       binding: CategoryBinding(),
       page: () => CategoryPage(),
@@ -93,6 +114,5 @@ class AppPages {
       name: Routes.articleDetail,
       page: () => ArticleDetailPage(),
     ),
-
   ];
 }

@@ -52,7 +52,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_shop/gen/assets.gen.dart';
-import 'package:project_shop/gen/colors.gen.dart';
+import 'package:project_shop/widgets/themes/app_colors.dart';
 import 'package:project_shop/widgets/icon_widget/icon_widget.dart';
 import 'package:project_shop/widgets/styles_widget/styles_widget.dart';
 

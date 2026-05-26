@@ -12,7 +12,7 @@ import 'package:project_shop/features/home/home_page.dart';
 import 'package:project_shop/features/navigation/main_screen_controller.dart';
 import 'package:project_shop/features/navigation/widget/enum_type.dart';
 import 'package:project_shop/features/wishlist/wish_list_page.dart';
-import 'package:project_shop/gen/colors.gen.dart';
+import 'package:project_shop/widgets/themes/app_colors.dart';
 import 'package:project_shop/widgets/icon_widget/icon_widget.dart';
 
 class MainScreen extends GetView<MainScreenController> {

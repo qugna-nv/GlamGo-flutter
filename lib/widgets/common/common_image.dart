@@ -7,7 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:project_shop/data/secure_storage/share_preference_manager.dart';
 import 'package:project_shop/gen/assets.gen.dart';
-import 'package:project_shop/gen/colors.gen.dart';
+import 'package:project_shop/widgets/themes/app_colors.dart';
 import 'package:project_shop/utils/constant.dart';
 import 'package:project_shop/utils/extension/getx_ex.dart';
 

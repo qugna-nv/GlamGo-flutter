@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:project_shop/gen/colors.gen.dart';
+import 'package:project_shop/widgets/themes/app_colors.dart';
 
 const DEFAULT_INTERVAL = 600;
 

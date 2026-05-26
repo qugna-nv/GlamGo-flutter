@@ -100,7 +100,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:project_shop/gen/assets.gen.dart';
-import 'package:project_shop/gen/colors.gen.dart';
+import 'package:project_shop/widgets/themes/app_colors.dart';
 import 'package:project_shop/widgets/icon_widget/icon_widget.dart';
 import 'package:project_shop/widgets/image_base/products_image_widget.dart';
 import 'package:project_shop/widgets/simple_rows/simple_row_content.dart';

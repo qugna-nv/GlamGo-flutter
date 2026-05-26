@@ -36,9 +36,9 @@ class OnboardingController extends BaseController {
 
   void getStarted() {
     if (isLastPage.value) {
-      Get.toNamed(Routes.initPage);
       sharedPreferencesManager.putBool(
           Constant.KEY_FIRST_SHOW_ONBOARDING, false);
+      Get.offAllNamed(Routes.initPage);
     } else {
       nextPage();
     }

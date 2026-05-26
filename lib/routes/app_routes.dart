@@ -1,4 +1,4 @@
-abstract class Routes{
+abstract class Routes {
   static const splash = '/splash';
   static const login = '/login';
   static const onboarding = '/onboarding';
@@ -6,7 +6,10 @@ abstract class Routes{
   static const initPage = '/navigation';
   static const wishlist = '/wishlist';
   static const cart = '/cart';
-  static const categories ='/categories';
+  static const checkout = '/checkout';
+  static const orders = '/orders';
+  static const addresses = '/addresses';
+  static const categories = '/categories';
   static const productDetail = '/productdetail';
   static const article = '/article';
   static const articleDetail = '/article-detail';

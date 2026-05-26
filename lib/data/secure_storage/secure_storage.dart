@@ -8,9 +8,11 @@ class SecureStorage {
   static const _accessTokenKey = 'accessToken';
   static const _refreshTokenKey = 'refreshToken';
 
-  Future<void> saveTokens(String accessToken, String refreshToken) async {
+  Future<void> saveTokens(String accessToken, [String? refreshToken]) async {
     await _storage.write(key: _accessTokenKey, value: accessToken);
-    await _storage.write(key: _refreshTokenKey, value: refreshToken);
+    if (refreshToken != null) {
+      await _storage.write(key: _refreshTokenKey, value: refreshToken);
+    }
   }
 
   Future<String?> getAccessToken() async {
@@ -27,6 +29,6 @@ class SecureStorage {
   }
 
   Future<bool> isFirstLogin() async {
-    return await getAccessToken() == null || await getRefreshToken() == null;
+    return await getAccessToken() == null;
   }
 }

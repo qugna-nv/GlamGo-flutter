@@ -24,6 +24,7 @@ class ItemDetail extends StatelessWidget {
           children: attributeValues.map((item) {
             return AttributeCustom(
               name: item.name ?? 'N/A',
+              value: item.id,
               selectedAttribute: selected,
               onTap: (value) {
                 onSelected?.call(value);

@@ -1,24 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:project_shop/gen/colors.gen.dart';
+import 'package:project_shop/widgets/themes/app_colors.dart';
 
 class AttributeCustom extends StatelessWidget {
   final dynamic name;
+  final dynamic value;
   final dynamic selectedAttribute;
-  final void Function(String) onTap;
+  final void Function(dynamic) onTap;
 
   const AttributeCustom({
     super.key,
     required this.name,
+    this.value,
     required this.selectedAttribute,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isSelected = name == selectedAttribute;
+    final currentValue = value ?? name;
+    final isSelected = currentValue == selectedAttribute;
 
     return GestureDetector(
-        onTap: () => onTap(name),
+        onTap: () => onTap(currentValue),
         child: Container(
           constraints: BoxConstraints(
             minWidth: 60,

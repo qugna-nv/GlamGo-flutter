@@ -77,6 +77,12 @@ class HomeController extends BaseController {
     super.onInit();
   }
 
+  Future<void> onRefresh() async {
+    await getBanner();
+    await getCategories();
+    await getProducts();
+  }
+
   void selectCategory({required int index, int? categoryId}) {
     _selectedIndex.value = index;
 

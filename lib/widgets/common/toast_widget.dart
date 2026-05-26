@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-import 'package:project_shop/gen/colors.gen.dart';
+import 'package:project_shop/widgets/themes/app_colors.dart';
 import 'package:project_shop/widgets/appbar_custom/common_snackbar.dart';
 import 'package:project_shop/widgets/common/common_image.dart';
 import 'package:project_shop/widgets/inkwell/default_ink_well.dart';

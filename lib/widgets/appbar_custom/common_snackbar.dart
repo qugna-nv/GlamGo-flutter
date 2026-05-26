@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:project_shop/gen/assets.gen.dart';
-import 'package:project_shop/gen/colors.gen.dart';
+import 'package:project_shop/widgets/themes/app_colors.dart';
 import 'package:project_shop/utils/constant.dart';
 import 'package:project_shop/widgets/common/common_image.dart';
 import 'package:project_shop/widgets/styles_widget/styles_widget.dart';
@@ -252,7 +252,8 @@ class CommonSnackbar {
                       HtmlWidget(
                         description,
                         textStyle: Styles.normalText(
-                            color: ColorName.primaryLightTextColor, size: 14.sp),
+                            color: ColorName.primaryLightTextColor,
+                            size: 14.sp),
                       ),
                     ],
                   ),

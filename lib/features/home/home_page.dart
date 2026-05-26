@@ -7,7 +7,7 @@ import 'package:project_shop/features/home/home_controller.dart';
 import 'package:project_shop/features/home/widget/infinite_carousel.dart';
 import 'package:project_shop/features/products/widget/products_item_view.dart';
 import 'package:project_shop/gen/assets.gen.dart';
-import 'package:project_shop/gen/colors.gen.dart';
+import 'package:project_shop/widgets/themes/app_colors.dart';
 import 'package:project_shop/routes/app_routes.dart';
 import 'package:project_shop/widgets/icon_widget/icon_widget.dart';
 import 'package:project_shop/widgets/inkwell/default_ink_well.dart';
@@ -26,100 +26,106 @@ class HomePage extends GetView<HomeController> {
           }
           return Stack(
             children: [
-              SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: 50,
-                      ),
-                      SizedBox(
-                        height: Get.height * 0.31,
-                        child: InfiniteCarousel(),
-                      ),
-                      Container(
-                        height: 50,
-                        padding: EdgeInsets.symmetric(vertical: 6),
-                        margin: EdgeInsets.symmetric(vertical: 10),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: controller.listCategories.length + 1,
-                          itemBuilder: (context, index) {
-                            return Obx(
-                              () {
-                                if (index == 0) {
-                                  return ItemCategories(
-                                    selectedIndex: controller.selectedIndex,
-                                    index: index,
-                                    categoryName: "Tất cả",
-                                    onTap: () {
-                                      controller.selectCategory(index: index);
-                                    },
-                                  );
-                                } else {
-                                  final category =
-                                      controller.listCategories[index - 1];
-                                  return ItemCategories(
-                                    selectedIndex: controller.selectedIndex,
-                                    index: index,
-                                    categoryName: category.name,
-                                    onTap: () {
-                                      controller.selectCategory(
-                                          index: index,
-                                          categoryId: category.id ?? 0);
-                                    },
-                                  );
-                                }
-                              },
-                            );
-                          },
+              RefreshIndicator(
+                onRefresh: () async {
+                  await controller.onRefresh();
+                },
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: 50,
                         ),
-                      ),
-                      Obx(() {
-                        if (controller.listDisplayedProducts.isEmpty) {
-                          return Center(child: Text('Không có sản phẩm nào'));
-                        }
-                        return GridView.builder(
-                          physics: NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          itemCount: controller.listDisplayedProducts.length,
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 1,
-                            crossAxisSpacing: 8,
-                            mainAxisSpacing: 8,
-                            mainAxisExtent: 330,
+                        SizedBox(
+                          height: Get.height * 0.31,
+                          child: InfiniteCarousel(),
+                        ),
+                        Container(
+                          height: 50,
+                          padding: EdgeInsets.symmetric(vertical: 6),
+                          margin: EdgeInsets.symmetric(vertical: 10),
+                          child: ListView.builder(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            scrollDirection: Axis.horizontal,
+                            itemCount: controller.listCategories.length + 1,
+                            itemBuilder: (context, index) {
+                              return Obx(
+                                () {
+                                  if (index == 0) {
+                                    return ItemCategories(
+                                      selectedIndex: controller.selectedIndex,
+                                      index: index,
+                                      categoryName: "Tất cả",
+                                      onTap: () {
+                                        controller.selectCategory(index: index);
+                                      },
+                                    );
+                                  } else {
+                                    final category =
+                                        controller.listCategories[index - 1];
+                                    return ItemCategories(
+                                      selectedIndex: controller.selectedIndex,
+                                      index: index,
+                                      categoryName: category.name,
+                                      onTap: () {
+                                        controller.selectCategory(
+                                            index: index,
+                                            categoryId: category.id ?? 0);
+                                      },
+                                    );
+                                  }
+                                },
+                              );
+                            },
                           ),
-                          itemBuilder: (context, index) {
-                            final products =
-                                controller.listDisplayedProducts[index];
-                            return GestureDetector(
-                              onTap: () {
-                                Get.toNamed(Routes.productDetail,
-                                    arguments: products.id);
-                              },
-                              child: Obx(() {
-                                return ProductsItemView(
-                                  name: products.name,
-                                  path: Utils.I
-                                      .getImageFullPath(products.image ?? ''),
-                                  price: Utils.I
-                                      .formatCurrency(products.price ?? 0.0),
-                                  priceSale: Utils.I.formatCurrency(
-                                      products.priceSale ?? 0.0),
-                                  onTap: () => controller.wishListController
-                                      .toggleFavorite(products),
-                                  isWishList: controller.wishListController
-                                      .isFavorite(products),
-                                );
-                              }),
-                            );
-                          },
-                        );
-                      }),
-                    ],
+                        ),
+                        Obx(() {
+                          if (controller.listDisplayedProducts.isEmpty) {
+                            return Center(child: Text('Không có sản phẩm nào'));
+                          }
+                          return GridView.builder(
+                            physics: NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            itemCount: controller.listDisplayedProducts.length,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 1,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
+                              mainAxisExtent: 330,
+                            ),
+                            itemBuilder: (context, index) {
+                              final products =
+                                  controller.listDisplayedProducts[index];
+                              return GestureDetector(
+                                onTap: () {
+                                  Get.toNamed(Routes.productDetail,
+                                      arguments: products.id);
+                                },
+                                child: Obx(() {
+                                  return ProductsItemView(
+                                    name: products.name,
+                                    path: Utils.I
+                                        .getImageFullPath(products.image ?? ''),
+                                    price: Utils.I
+                                        .formatCurrency(products.price ?? 0.0),
+                                    priceSale: Utils.I.formatCurrency(
+                                        products.priceSale ?? 0.0),
+                                    onTap: () => controller.wishListController
+                                        .toggleFavorite(products),
+                                    isWishList: controller.wishListController
+                                        .isFavorite(products),
+                                  );
+                                }),
+                              );
+                            },
+                          );
+                        }),
+                      ],
+                    ),
                   ),
                 ),
               ),

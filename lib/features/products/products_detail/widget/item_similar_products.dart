@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:project_shop/gen/colors.gen.dart';
+import 'package:project_shop/widgets/themes/app_colors.dart';
 import 'package:project_shop/widgets/image_base/base_image_widget.dart';
 import 'package:project_shop/widgets/styles_widget/styles_widget.dart';
 

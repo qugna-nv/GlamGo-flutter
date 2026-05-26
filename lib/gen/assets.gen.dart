@@ -9,6 +9,16 @@
 
 import 'package:flutter/widgets.dart';
 
+class $AssetsAddressGen {
+  const $AssetsAddressGen();
+
+  /// File path: assets/address/location-data.json
+  String get locationData => 'assets/address/location-data.json';
+
+  /// List of all assets
+  List<String> get values => [locationData];
+}
+
 class $AssetsIconsGen {
   const $AssetsIconsGen();
 
@@ -166,6 +176,13 @@ class $AssetsImagesGen {
   /// File path: assets/images/biometric.svg
   String get biometric => 'assets/images/biometric.svg';
 
+  /// File path: assets/images/cart_empty.png
+  AssetGenImage get cartEmpty =>
+      const AssetGenImage('assets/images/cart_empty.png');
+
+  /// File path: assets/images/gift.png
+  AssetGenImage get gift => const AssetGenImage('assets/images/gift.png');
+
   /// File path: assets/images/ic_heart.png
   AssetGenImage get icHeart =>
       const AssetGenImage('assets/images/ic_heart.png');
@@ -229,11 +246,17 @@ class $AssetsImagesGen {
   AssetGenImage get storeLogo =>
       const AssetGenImage('assets/images/store_logo.png');
 
+  /// File path: assets/images/wishlist_empty.png
+  AssetGenImage get wishlistEmpty =>
+      const AssetGenImage('assets/images/wishlist_empty.png');
+
   /// List of all assets
   List<dynamic> get values => [
     avatar,
     banner,
     biometric,
+    cartEmpty,
+    gift,
     icHeart,
     icHeartFill,
     icLocation,
@@ -250,12 +273,14 @@ class $AssetsImagesGen {
     onboarding2,
     onboarding3,
     storeLogo,
+    wishlistEmpty,
   ];
 }
 
 class Assets {
   const Assets._();
 
+  static const $AssetsAddressGen address = $AssetsAddressGen();
   static const $AssetsIconsGen icons = $AssetsIconsGen();
   static const $AssetsImagesGen images = $AssetsImagesGen();
 }

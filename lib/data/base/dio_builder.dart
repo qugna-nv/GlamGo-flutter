@@ -24,10 +24,10 @@ class DioBuilder {
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
         print('Request: ${options.path}');
-        // if (options.path.contains('login')) return handler.next(options);
-        // final accessToken = await secureStorage.getAccessToken();
-        // final accessToken = "AppConfigs.accessToken";
-        // options.headers['Authorization'] = 'Bearer $accessToken';
+        final accessToken = await secureStorage.getAccessToken();
+        if (accessToken != null && accessToken.isNotEmpty) {
+          options.headers['Authorization'] = 'Bearer $accessToken';
+        }
         printCurlCommand(options);
         return handler.next(options);
       },

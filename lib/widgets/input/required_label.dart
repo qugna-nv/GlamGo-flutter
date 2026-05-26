@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:project_shop/gen/colors.gen.dart';
+import 'package:project_shop/widgets/themes/app_colors.dart';
 import 'package:project_shop/widgets/styles_widget/styles_widget.dart';
 
 class RequiredLabel extends StatelessWidget {
@@ -42,7 +42,8 @@ class RequiredLabel extends StatelessWidget {
         ),
         const Text(" "),
         Text(requiredSymbol,
-            style: requiredStyle ?? Styles.normalText(size: 18.sp).copyWith(color: ColorName.red5)),
+            style: requiredStyle ??
+                Styles.normalText(size: 18.sp).copyWith(color: ColorName.red5)),
         const Text(" "),
         if (suffixIcon != null) suffixIcon!,
       ],

@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:project_shop/gen/colors.gen.dart';
+import 'package:project_shop/widgets/themes/app_colors.dart';
 import 'package:project_shop/widgets/styles_widget/styles_widget.dart';
 
 class SimpleRowContent extends StatelessWidget {

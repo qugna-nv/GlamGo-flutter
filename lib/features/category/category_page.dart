@@ -28,6 +28,7 @@ class CategoryPage extends GetView<CategoryController> {
                     padding: EdgeInsets.symmetric(vertical: 6),
                     margin: EdgeInsets.symmetric(vertical: 10),
                     child: ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
                       scrollDirection: Axis.horizontal,
                       itemCount: controller.listCategories.length + 1,
                       itemBuilder: (context, index) {
@@ -68,33 +69,41 @@ class CategoryPage extends GetView<CategoryController> {
                       }
                       return Expanded(
                         child: Obx(
-                          () => GridView.builder(
-                            itemCount: controller.listDisplayedProducts.length,
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              childAspectRatio: 1,
-                              crossAxisSpacing: 8,
-                              mainAxisSpacing: 8,
-                              mainAxisExtent: 330,
-                            ),
-                            itemBuilder: (context, index) {
-                              final products =
-                                  controller.listDisplayedProducts[index];
-                              return Obx(() {
-                                return ProductsItemView(
-                                  name: products.name,
-                                  path: Utils.I
-                                      .getImageFullPath(products.image ?? ''),
-                                  price: products.price.toString(),
-                                  priceSale: products.priceSale.toString(),
-                                  onTap: () => controller.wishListController
-                                      .toggleFavorite(products),
-                                  isWishList: controller.wishListController
-                                      .isFavorite(products),
-                                );
-                              });
+                          () => RefreshIndicator(
+                            onRefresh: () async {
+                              await controller.onRefresh();
                             },
+                            child: GridView.builder(
+                              itemCount:
+                                  controller.listDisplayedProducts.length,
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                childAspectRatio: 1,
+                                crossAxisSpacing: 8,
+                                mainAxisSpacing: 8,
+                                mainAxisExtent: 330,
+                              ),
+                              itemBuilder: (context, index) {
+                                final products =
+                                    controller.listDisplayedProducts[index];
+                                return Obx(() {
+                                  return ProductsItemView(
+                                    name: products.name,
+                                    path: Utils.I
+                                        .getImageFullPath(products.image ?? ''),
+                                    price: Utils.I
+                                        .formatCurrency(products.price ?? 0.0),
+                                    priceSale: Utils.I.formatCurrency(
+                                        products.priceSale ?? 0.0),
+                                    onTap: () => controller.wishListController
+                                        .toggleFavorite(products),
+                                    isWishList: controller.wishListController
+                                        .isFavorite(products),
+                                  );
+                                });
+                              },
+                            ),
                           ),
                         ),
                       );
