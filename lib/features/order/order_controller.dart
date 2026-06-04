@@ -6,13 +6,32 @@ import 'package:project_shop/data/response_models/orders/order_model.dart';
 import 'package:project_shop/data/secure_storage/secure_storage.dart';
 import 'package:project_shop/routes/app_routes.dart';
 
+class OrderStatusTab {
+  const OrderStatusTab({required this.label, this.status});
+
+  final String label;
+  final int? status;
+}
+
 class OrderController extends BaseController {
   final ApiService apiService = Get.find();
   final SecureStorage secureStorage = Get.find();
 
+  final tabs = const <OrderStatusTab>[
+    OrderStatusTab(label: 'Tất cả'),
+    OrderStatusTab(label: 'Chờ xác nhận', status: 1),
+    OrderStatusTab(label: 'Chờ lấy hàng', status: 2),
+    OrderStatusTab(label: 'Chờ giao hàng', status: 3),
+    OrderStatusTab(label: 'Đã giao', status: 4),
+    OrderStatusTab(label: 'Đã huỷ', status: 5),
+  ];
+
+  final selectedTabIndex = 0.obs;
   final orders = <OrderSummaryModel>[].obs;
   final Rxn<OrderDetailModel> selectedOrder = Rxn<OrderDetailModel>();
   final RxBool detailLoading = false.obs;
+
+  OrderStatusTab get selectedTab => tabs[selectedTabIndex.value];
 
   @override
   void onReady() {
@@ -36,12 +55,19 @@ class OrderController extends BaseController {
     return false;
   }
 
+  Future<void> selectTab(int index) async {
+    if (index == selectedTabIndex.value) return;
+
+    selectedTabIndex.value = index;
+    await getOrders();
+  }
+
   Future<void> getOrders() async {
     if (!await ensureLoggedIn()) return;
 
     isLoading.value = true;
     try {
-      final response = await apiService.getOrders();
+      final response = await apiService.getOrders(selectedTab.status);
       orders.assignAll(response.data?.data ?? []);
     } catch (error) {
       Get.snackbar('Don hang', _getErrorMessage(error));
@@ -80,25 +106,43 @@ class OrderController extends BaseController {
     }
   }
 
+  Future<void> buyAgain(OrderItemModel item) async {
+    if (!await ensureLoggedIn()) return;
+
+    try {
+      await apiService.addCartItem({
+        'product_id': item.productId,
+        'quantity': item.quantity > 0 ? item.quantity : 1,
+        'attribute_name_id': item.attributeNameId,
+        'attribute_ids': item.attributes
+            .map((attribute) => attribute.attributeValueId)
+            .toList(),
+      });
+      Get.snackbar('Giỏ hàng', 'Da them sản phẩm vao giỏ hàng.');
+    } catch (error) {
+      Get.snackbar('Giỏ hàng', _getErrorMessage(error));
+    }
+  }
+
   String statusText(int status) {
     switch (status) {
       case 1:
-        return 'Cho kiem tra';
+        return 'chờ xác nhận';
       case 2:
-        return 'Dang chuan bi';
+        return 'Đang chuẩn bị';
       case 3:
-        return 'Dang giao';
+        return 'Đang giao';
       case 4:
-        return 'Da giao';
+        return 'Đã giao';
       case 5:
-        return 'Da huy';
+        return 'Đã huỷ';
       default:
-        return 'Khong xac dinh';
+        return 'Không xác định';
     }
   }
 
   String paymentStatusText(int status) {
-    return status == 1 ? 'Da thanh toan' : 'Chua thanh toan';
+    return status == 1 ? 'Đã thanh toán' : 'Chưa thanh toán';
   }
 
   String _getErrorMessage(Object error) {

@@ -15,20 +15,36 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   final prefs = await SharedPreferences.getInstance();
   Get.put(SharedPreferencesManager(sharedPreferences: prefs));
+
   await AppInitializer.init();
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  await Get.putAsync<NotificationService>(
-    () async => await NotificationService().init(),
-  );
 
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then(
-    (_) => runApp(const MyApp()),
-  );
+  runApp(const MyApp());
+
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    _initBackgroundServices();
+  });
+}
+
+Future<void> _initBackgroundServices() async {
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+
+    await Get.putAsync<NotificationService>(
+      () => NotificationService().init(),
+    );
+  } catch (e, stackTrace) {
+    debugPrint('Init background services failed: $e');
+    debugPrintStack(stackTrace: stackTrace);
+  }
 }
 
 class MyApp extends StatelessWidget {

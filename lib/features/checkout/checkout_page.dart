@@ -4,7 +4,11 @@ import 'package:project_shop/base/util/utils.dart';
 import 'package:project_shop/data/response_models/address/address_model.dart';
 import 'package:project_shop/data/response_models/cart/cart_model.dart';
 import 'package:project_shop/features/checkout/checkout_controller.dart';
+import 'package:project_shop/gen/assets.gen.dart';
+import 'package:project_shop/utils/app_field_group.dart';
+import 'package:project_shop/utils/app_text_field.dart';
 import 'package:project_shop/widgets/button/normal_button.dart';
+import 'package:project_shop/widgets/icon_widget/icon_widget.dart';
 import 'package:project_shop/widgets/image_base/base_image_widget.dart';
 import 'package:project_shop/widgets/styles_widget/styles_widget.dart';
 import 'package:project_shop/widgets/themes/app_colors.dart';
@@ -16,7 +20,7 @@ class CheckoutPage extends GetView<CheckoutController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Xac nhan don hang'),
+        title: const Text('Xác nhận đơn hàng'),
         centerTitle: true,
       ),
       body: Obx(() {
@@ -24,60 +28,54 @@ class CheckoutPage extends GetView<CheckoutController> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final cart = controller.cart.value;
-        if (cart == null || cart.items.isEmpty) {
-          return const Center(child: Text('Gio hang dang trong.'));
+        if (controller.checkoutItems.isEmpty) {
+          return const Center(child: Text('Chua chon sản phẩm nao.'));
         }
 
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 110),
           children: [
-            _titleRow(
-              title: 'Dia chi nhan hang',
-              actionText: 'Quan ly',
-              onTap: controller.manageAddresses,
-            ),
-            const SizedBox(height: 10),
-            if (controller.addresses.isEmpty)
-              _MissingAddress(onAdd: controller.manageAddresses)
+            if (controller.selectedAddress.value == null)
+              _MissingAddress(
+                onAdd: controller.manageAddresses,
+                message: controller.addresses.isEmpty
+                    ? 'Ban chua co dia chi giao hang.'
+                    : 'Ban chua co dia chi mac dinh.',
+              )
             else
-              ...controller.addresses.map(
-                (address) => Obx(() => _SelectableAddress(
-                      address: address,
-                      selected:
-                          controller.selectedAddress.value?.id == address.id,
-                      onTap: () => controller.selectAddress(address),
-                    )),
+              _DefaultAddress(
+                address: controller.selectedAddress.value!,
+                onTap: controller.manageAddresses,
               ),
             const SizedBox(height: 20),
-            Text('San pham', style: Styles.normalTextW700(size: 16)),
+            Text('Sản phẩm đã chọn', style: Styles.normalTextW700(size: 16)),
             const SizedBox(height: 10),
-            ...cart.items.map((item) => _CheckoutItem(item: item)),
+            ...controller.checkoutItems
+                .map((item) => _CheckoutItem(item: item)),
             const SizedBox(height: 12),
-            TextField(
-              controller: controller.couponController,
-              decoration: const InputDecoration(
-                labelText: 'Ma giam gia',
-                border: OutlineInputBorder(),
-              ),
-            ),
+            // TextField(
+            //   controller: controller.couponController,
+            //   decoration: const InputDecoration(
+            //     labelText: 'Ma giam gia',
+            //     border: OutlineInputBorder(),
+            //   ),
+            // ),
             const SizedBox(height: 10),
-            TextField(
-              controller: controller.noteController,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'Ghi chu cho don hang',
-                border: OutlineInputBorder(),
+            AppFieldGroup(
+              label: 'Ghi chú',
+              child: AppTextField.standard(
+                controller: controller.noteController,
+                hintText: 'Nhập nội dung ghi chú',
+                maxLines: 3,
               ),
             ),
             const SizedBox(height: 18),
-            _PriceSummary(cart: cart),
+            _PriceSummary(controller: controller),
           ],
         );
       }),
       bottomNavigationBar: Obx(() {
-        final cart = controller.cart.value;
-        if (controller.isLoading.value || cart == null || cart.items.isEmpty) {
+        if (controller.isLoading.value || controller.checkoutItems.isEmpty) {
           return const SizedBox.shrink();
         }
 
@@ -102,7 +100,7 @@ class CheckoutPage extends GetView<CheckoutController> {
                   children: [
                     const Text('Tong thanh toan'),
                     Text(
-                      Utils.I.formatCurrency(cart.totalPrice),
+                      Utils.I.formatCurrency(controller.checkoutTotalPrice),
                       style: Styles.normalTextW700(
                           size: 16, color: ColorName.red14),
                     ),
@@ -126,30 +124,15 @@ class CheckoutPage extends GetView<CheckoutController> {
       }),
     );
   }
-
-  Widget _titleRow({
-    required String title,
-    required String actionText,
-    required VoidCallback onTap,
-  }) {
-    return Row(
-      children: [
-        Expanded(child: Text(title, style: Styles.normalTextW700(size: 16))),
-        TextButton(onPressed: onTap, child: Text(actionText)),
-      ],
-    );
-  }
 }
 
-class _SelectableAddress extends StatelessWidget {
-  const _SelectableAddress({
+class _DefaultAddress extends StatelessWidget {
+  const _DefaultAddress({
     required this.address,
-    required this.selected,
     required this.onTap,
   });
 
   final AddressModel address;
-  final bool selected;
   final VoidCallback onTap;
 
   @override
@@ -161,41 +144,29 @@ class _SelectableAddress extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 12, top: 2),
-                child: Icon(
-                  selected
-                      ? Icons.radio_button_checked
-                      : Icons.radio_button_unchecked,
-                  color: selected ? ColorName.black : ColorName.grey1,
-                ),
-              ),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Expanded(
-                          child: Text(
-                            address.recipientName ?? 'Nguoi nhan',
-                            style: Styles.normalTextW700(size: 14),
-                          ),
+                        Text(
+                          address.recipientName ?? 'Nguoi nhan',
+                          style: Styles.normalTextW700(size: 14),
                         ),
-                        if (address.isDefault)
-                          const Text(
-                            'Mac dinh',
-                            style: TextStyle(color: Colors.green),
-                          ),
+                        SizedBox(
+                          width: 12,
+                        ),
+                        Text(address.phone ?? ''),
                       ],
                     ),
-                    Text(address.phone ?? ''),
                     Text(address.addressLine ?? ''),
                   ],
                 ),
               ),
+              IconWidget.ic24(path: Assets.icons.icArrowRightNew)
             ],
           ),
         ),
@@ -205,9 +176,13 @@ class _SelectableAddress extends StatelessWidget {
 }
 
 class _MissingAddress extends StatelessWidget {
-  const _MissingAddress({required this.onAdd});
+  const _MissingAddress({
+    required this.onAdd,
+    required this.message,
+  });
 
   final VoidCallback onAdd;
+  final String message;
 
   @override
   Widget build(BuildContext context) {
@@ -219,8 +194,8 @@ class _MissingAddress extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const Text('Ban chua co dia chi giao hang.'),
-          TextButton(onPressed: onAdd, child: const Text('Them dia chi')),
+          Text(message),
+          TextButton(onPressed: onAdd, child: const Text('Quan ly dia chi')),
         ],
       ),
     );
@@ -255,11 +230,19 @@ class _CheckoutItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.productName ?? 'San pham',
+                  item.productName ?? 'Sản phẩm',
                   style: Styles.normalTextW600(size: 14),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
+                if (item.attributes.isNotEmpty)
+                  Text(
+                    item.attributes
+                        .map((attribute) =>
+                            '${attribute.attributeName ?? 'Phan loai'}: ${attribute.attributeValue ?? ''}')
+                        .join(', '),
+                    style: Styles.normalText(size: 12, color: ColorName.grey1),
+                  ),
                 Text('x${item.quantity}'),
                 Text(
                   Utils.I.formatCurrency(item.totalPrice),
@@ -275,18 +258,18 @@ class _CheckoutItem extends StatelessWidget {
 }
 
 class _PriceSummary extends StatelessWidget {
-  const _PriceSummary({required this.cart});
+  const _PriceSummary({required this.controller});
 
-  final CartModel cart;
+  final CheckoutController controller;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _row('Tam tinh', cart.subtotal),
-        _row('Giam gia', cart.discount),
+        _row('Tam tinh', controller.checkoutSubtotal),
+        _row('Giam gia', controller.cart.value?.discount ?? 0),
         const Divider(height: 18),
-        _row('Thanh toan', cart.totalPrice, bold: true),
+        _row('Thanh toan', controller.checkoutTotalPrice, bold: true),
       ],
     );
   }

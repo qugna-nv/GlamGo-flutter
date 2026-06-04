@@ -116,7 +116,7 @@ class ProductsRepository implements IProductsRepository {
     if (error is DioException) {
       final data = error.response?.data;
       if (data is Map<String, dynamic>) {
-        return data['message']?.toString() ?? 'Co loi xay ra.';
+        return data['message']?.toString() ?? 'Có lỗi xảy ra.';
       }
     }
 

@@ -86,6 +86,9 @@ class CartItemModel {
   @JsonKey(name: 'attribute_ids', fromJson: attributeIdsFromJson)
   final List<int> attributeIds;
 
+  @JsonKey(defaultValue: [])
+  final List<CartAttributeModel> attributes;
+
   @JsonKey(name: 'personalise_name')
   final String? personaliseName;
 
@@ -106,6 +109,7 @@ class CartItemModel {
     this.productImage,
     this.attributeNameId,
     required this.attributeIds,
+    required this.attributes,
     this.personaliseName,
     required this.price,
     required this.quantity,
@@ -116,6 +120,22 @@ class CartItemModel {
       _$CartItemModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$CartItemModelToJson(this);
+}
+
+@JsonSerializable()
+class CartAttributeModel {
+  @JsonKey(name: 'attribute_name')
+  final String? attributeName;
+
+  @JsonKey(name: 'attribute_value')
+  final String? attributeValue;
+
+  CartAttributeModel({this.attributeName, this.attributeValue});
+
+  factory CartAttributeModel.fromJson(Map<String, dynamic> json) =>
+      _$CartAttributeModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$CartAttributeModelToJson(this);
 }
 
 int? stringToIntNullable(dynamic value) {

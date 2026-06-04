@@ -223,23 +223,63 @@ class HomePage extends GetView<HomeController> {
             ),
           ),
           SizedBox(width: 8),
-          Container(
-            padding: EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              border: Border.all(color: ColorName.grey53),
-              borderRadius: BorderRadius.circular(40.r),
-            ),
-            child: GestureDetector(
-              onTap: () {
-                Get.toNamed(Routes.cart);
-              },
-              child: IconWidget.ic24(
+          _cartButton(),
+        ],
+      ),
+    );
+  }
+
+  Widget _cartButton() {
+    return GestureDetector(
+      onTap: () async {
+        await Get.toNamed(Routes.cart);
+        controller.cartController.getCart(
+          redirectIfUnauthenticated: false,
+          showErrors: false,
+        );
+      },
+      child: Container(
+        padding: EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          border: Border.all(color: ColorName.grey53),
+          borderRadius: BorderRadius.circular(40.r),
+        ),
+        child: Obx(() {
+          final quantity = controller.cartController.totalQuantity;
+
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              IconWidget.ic24(
                 path: Assets.icons.icShoppingBag,
                 color: ColorName.black,
               ),
-            ),
-          ),
-        ],
+              if (quantity > 0)
+                Positioned(
+                  top: -8,
+                  right: -8,
+                  child: Container(
+                    constraints:
+                        const BoxConstraints(minWidth: 18, minHeight: 18),
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    decoration: BoxDecoration(
+                      color: ColorName.red14,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      quantity > 99 ? '99+' : '$quantity',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          );
+        }),
       ),
     );
   }

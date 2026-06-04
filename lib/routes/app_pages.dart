@@ -1,5 +1,6 @@
-import 'package:get/get_navigation/src/routes/get_route.dart';
-import 'package:get/get_navigation/src/routes/transitions_type.dart';
+import 'package:get/get.dart';
+import 'package:project_shop/data/response_models/address/address_model.dart';
+import 'package:project_shop/features/address/widgets/address_form_page.dart';
 import 'package:project_shop/features/article/article_binding.dart';
 import 'package:project_shop/features/article/article_detail/article_detail_page.dart';
 import 'package:project_shop/features/article/article_page.dart';
@@ -7,6 +8,8 @@ import 'package:project_shop/features/address/address_binding.dart';
 import 'package:project_shop/features/address/address_page.dart';
 import 'package:project_shop/features/cart/cart_binding.dart';
 import 'package:project_shop/features/cart/cart_page.dart';
+import 'package:project_shop/features/chat/chat_binding.dart';
+import 'package:project_shop/features/chat/chat_page.dart';
 import 'package:project_shop/features/checkout/checkout_binding.dart';
 import 'package:project_shop/features/checkout/checkout_page.dart';
 import 'package:project_shop/features/category/category_binding.dart';
@@ -21,6 +24,8 @@ import 'package:project_shop/features/onboarding/onboarding_binding.dart';
 import 'package:project_shop/features/onboarding/onboarding_page.dart';
 import 'package:project_shop/features/order/order_binding.dart';
 import 'package:project_shop/features/order/order_page.dart';
+import 'package:project_shop/features/product_review/product_review_binding.dart';
+import 'package:project_shop/features/product_review/product_review_page.dart';
 import 'package:project_shop/features/products/products_detail/product_detail_binding.dart';
 import 'package:project_shop/features/products/products_detail/product_detail_page.dart';
 import 'package:project_shop/features/splash/splash_binding.dart';
@@ -92,6 +97,17 @@ class AppPages {
       page: () => const AddressPage(),
     ),
     GetPage(
+      name: Routes.addressForm,
+      page: () => AddressFormPage(
+        address: Get.arguments is AddressModel ? Get.arguments : null,
+      ),
+    ),
+    GetPage(
+      name: Routes.chat,
+      binding: ChatBinding(),
+      page: () => const ChatPage(),
+    ),
+    GetPage(
       name: Routes.categories,
       binding: CategoryBinding(),
       page: () => CategoryPage(),
@@ -104,6 +120,11 @@ class AppPages {
       page: () => ProductDetailPage(),
       // transition: Transition.cupertino,
       // transitionDuration: Duration(seconds: 1),
+    ),
+    GetPage(
+      name: Routes.productReview,
+      binding: ProductReviewBinding(),
+      page: () => const ProductReviewPage(),
     ),
     GetPage(
       name: Routes.article,

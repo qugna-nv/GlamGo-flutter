@@ -13,11 +13,27 @@ class CartController extends BaseController {
   final SecureStorage secureStorage = Get.find();
 
   final Rxn<CartModel> cart = Rxn<CartModel>();
+  final RxList<int> selectedItemIds = <int>[].obs;
   final Map<int, Timer> _quantityDebouncers = {};
   final Map<int, int> _pendingQuantities = {};
 
   List<CartItemModel> get items => cart.value?.items ?? [];
   bool get isEmpty => items.isEmpty;
+  int get totalQuantity => items.length;
+  List<CartItemModel> get selectedItems =>
+      items.where((item) => selectedItemIds.contains(item.id)).toList();
+  bool get hasSelectedItems => selectedItemIds.isNotEmpty;
+  bool get isAllSelected =>
+      items.isNotEmpty && selectedItemIds.length == items.length;
+  int get selectedTotalQuantity =>
+      selectedItems.fold<int>(0, (sum, item) => sum + item.quantity);
+  double get selectedSubtotal =>
+      selectedItems.fold<double>(0, (sum, item) => sum + item.totalPrice);
+  double get selectedTotalPrice {
+    final discount = cart.value?.discount ?? 0;
+    final total = selectedSubtotal - discount;
+    return total < 0 ? 0 : total;
+  }
 
   @override
   void onReady() {
@@ -26,33 +42,68 @@ class CartController extends BaseController {
   }
 
   Future<void> _loadIfLoggedIn() async {
-    if (!await ensureLoggedIn()) return;
-    await getCart();
+    if (!await ensureLoggedIn(redirectToLogin: false)) return;
+    await getCart(redirectIfUnauthenticated: false, showErrors: false);
   }
 
-  Future<bool> ensureLoggedIn() async {
+  Future<bool> ensureLoggedIn({bool redirectToLogin = true}) async {
     final token = await secureStorage.getAccessToken();
     if (token != null && token.isNotEmpty) {
       return true;
     }
 
-    Get.snackbar('Dang nhap', 'Vui long dang nhap de xem gio hang.');
-    Get.offNamed(Routes.login, arguments: {'redirect': Routes.cart});
+    if (redirectToLogin) {
+      Get.snackbar('Dang nhap', 'Vui long dang nhap de xem giỏ hàng.');
+      Get.offNamed(Routes.login, arguments: {'redirect': Routes.cart});
+    }
     return false;
   }
 
-  Future<void> getCart() async {
-    if (!await ensureLoggedIn()) return;
+  Future<void> getCart({
+    bool redirectIfUnauthenticated = true,
+    bool showErrors = true,
+  }) async {
+    if (!await ensureLoggedIn(redirectToLogin: redirectIfUnauthenticated)) {
+      setCart(null);
+      return;
+    }
 
     isLoading.value = true;
     try {
       final response = await apiService.getCart();
-      cart.value = response.data;
+      setCart(response.data);
     } catch (error) {
-      Get.snackbar('Gio hang', _getErrorMessage(error));
+      if (showErrors) {
+        Get.snackbar('Giỏ hàng', _getErrorMessage(error));
+      }
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void setCart(CartModel? value, {bool selectAllIfEmpty = true}) {
+    cart.value = value;
+    _syncSelectedItemsWithCart(selectAllIfEmpty: selectAllIfEmpty);
+  }
+
+  void toggleItemSelection(int itemId, bool selected) {
+    if (selected) {
+      if (!selectedItemIds.contains(itemId)) {
+        selectedItemIds.add(itemId);
+      }
+    } else {
+      selectedItemIds.remove(itemId);
+    }
+    selectedItemIds.refresh();
+  }
+
+  void toggleAllSelection(bool selected) {
+    if (selected) {
+      selectedItemIds.assignAll(items.map((item) => item.id));
+    } else {
+      selectedItemIds.clear();
+    }
+    selectedItemIds.refresh();
   }
 
   Future<void> updateQuantity(CartItemModel item, int quantity) async {
@@ -78,9 +129,9 @@ class CartController extends BaseController {
         _quantityDebouncers.remove(itemId)?.cancel();
       }
 
-      cart.value = _mergePendingQuantities(response.data);
+      setCart(_mergePendingQuantities(response.data), selectAllIfEmpty: false);
     } catch (error) {
-      Get.snackbar('Gio hang', _getErrorMessage(error));
+      Get.snackbar('Giỏ hàng', _getErrorMessage(error));
       await getCart();
     }
   }
@@ -93,10 +144,10 @@ class CartController extends BaseController {
 
     try {
       final response = await apiService.deleteCartItem(id);
-      cart.value = response.data;
-      Get.snackbar('Gio hang', 'Da xoa san pham khoi gio hang.');
+      setCart(response.data, selectAllIfEmpty: false);
+      Get.snackbar('Giỏ hàng', 'Đã xoá sản phẩm khỏi giỏ hàng.');
     } catch (error) {
-      Get.snackbar('Gio hang', _getErrorMessage(error));
+      Get.snackbar('Giỏ hàng', _getErrorMessage(error));
     }
   }
 
@@ -107,9 +158,9 @@ class CartController extends BaseController {
 
     try {
       final response = await apiService.clearCart();
-      cart.value = response.data;
+      setCart(response.data, selectAllIfEmpty: false);
     } catch (error) {
-      Get.snackbar('Gio hang', _getErrorMessage(error));
+      Get.snackbar('Giỏ hàng', _getErrorMessage(error));
     }
   }
 
@@ -132,6 +183,7 @@ class CartController extends BaseController {
 
   void _applyLocalQuantity(int itemId, int quantity) {
     cart.value = _copyCartWithQuantity(cart.value, itemId, quantity);
+    _syncSelectedItemsWithCart();
   }
 
   CartModel? _mergePendingQuantities(CartModel? source) {
@@ -157,6 +209,7 @@ class CartController extends BaseController {
         productImage: item.productImage,
         attributeNameId: item.attributeNameId,
         attributeIds: item.attributeIds,
+        attributes: item.attributes,
         personaliseName: item.personaliseName,
         price: item.price,
         quantity: quantity,
@@ -188,6 +241,16 @@ class CartController extends BaseController {
     }
     _quantityDebouncers.clear();
     _pendingQuantities.clear();
+  }
+
+  void _syncSelectedItemsWithCart({bool selectAllIfEmpty = false}) {
+    final itemIds = items.map((item) => item.id).toSet();
+    selectedItemIds.removeWhere((id) => !itemIds.contains(id));
+
+    if (selectAllIfEmpty && selectedItemIds.isEmpty && itemIds.isNotEmpty) {
+      selectedItemIds.assignAll(itemIds);
+    }
+    selectedItemIds.refresh();
   }
 
   @override

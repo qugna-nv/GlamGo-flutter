@@ -14,17 +14,20 @@ class WishListPage extends GetView<WishListController> {
     return SafeArea(
       child: Scaffold(
         appBar: CustomAppBar(
-          label: 'Sản phẩm yêu thích',
+          label: 'San pham yeu thich',
           showBackButton: false,
         ),
         body: Obx(() {
-          if (controller.favoriteProducts.isEmpty) {
-            return const Expanded(
-              child: EmtyWishlistScreen(),
-            );
+          if (controller.isLoading.value) {
+            return const Center(child: CircularProgressIndicator());
           }
 
-          return Expanded(
+          if (controller.favoriteProducts.isEmpty) {
+            return const EmtyWishlistScreen();
+          }
+
+          return RefreshIndicator(
+            onRefresh: controller.loadFavoriteProducts,
             child: ListView.builder(
               itemCount: controller.favoriteProducts.length,
               itemBuilder: (context, index) {

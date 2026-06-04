@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_shop/features/login/login_controller.dart';
+import 'package:project_shop/utils/app_text_field.dart';
 
 class LoginPage extends GetView<LoginController> {
   const LoginPage({super.key});
@@ -36,8 +37,8 @@ class LoginPage extends GetView<LoginController> {
                         const SizedBox(height: 8),
                         Text(
                           controller.isRegisterMode.value
-                              ? 'Dang ky tai khoan khach hang'
-                              : 'Dang nhap de tiep tuc',
+                              ? 'Đăng ký tài khoản khách hàng'
+                              : 'Đăng nhập để tiếp tục',
                           style: const TextStyle(
                             color: Colors.grey,
                             fontSize: 14,
@@ -48,69 +49,37 @@ class LoginPage extends GetView<LoginController> {
                   ),
                   const SizedBox(height: 40),
                   if (controller.isRegisterMode.value) ...[
-                    TextField(
+                    AppTextField.standard(
                       controller: controller.nameController,
-                      textInputAction: TextInputAction.next,
-                      decoration: InputDecoration(
-                        labelText: 'Ho ten',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
+                      hintText: 'Họ tên',
                     ),
                     const SizedBox(height: 16),
-                    TextField(
+                    AppTextField.standard(
                       controller: controller.phoneController,
                       keyboardType: TextInputType.phone,
-                      textInputAction: TextInputAction.next,
-                      decoration: InputDecoration(
-                        labelText: 'So dien thoai',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
+                      hintText: 'Số điện thoại',
                     ),
                     const SizedBox(height: 16),
                   ],
-                  TextField(
+                  AppTextField.standard(
                     controller: controller.emailController,
                     keyboardType: TextInputType.emailAddress,
-                    textInputAction: TextInputAction.next,
-                    decoration: InputDecoration(
-                      labelText: 'Email',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
+                    hintText: 'Email',
                   ),
                   const SizedBox(height: 16),
-                  TextField(
+                  AppTextField.standard(
                     controller: controller.passwordController,
                     obscureText: true,
-                    textInputAction: controller.isRegisterMode.value
-                        ? TextInputAction.next
-                        : TextInputAction.done,
+                    hintText: 'Mật khẩu',
                     onSubmitted: (_) => controller.submit(),
-                    decoration: InputDecoration(
-                      labelText: 'Mat khau',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
                   ),
                   if (controller.isRegisterMode.value) ...[
                     const SizedBox(height: 16),
-                    TextField(
+                    AppTextField.standard(
                       controller: controller.confirmPasswordController,
                       obscureText: true,
-                      textInputAction: TextInputAction.done,
                       onSubmitted: (_) => controller.submit(),
-                      decoration: InputDecoration(
-                        labelText: 'Nhap lai mat khau',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
+                      hintText: 'Nhập lại mật khẩu',
                     ),
                   ],
                   const SizedBox(height: 24),
@@ -129,10 +98,10 @@ class LoginPage extends GetView<LoginController> {
                       ),
                       child: Text(
                         controller.isLoading.value
-                            ? 'Dang xu ly...'
+                            ? 'Đang xử lý...'
                             : controller.isRegisterMode.value
-                                ? 'DANG KY'
-                                : 'DANG NHAP',
+                                ? 'ĐĂNG KÝ'
+                                : 'ĐĂNG NHẬP',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -148,8 +117,8 @@ class LoginPage extends GetView<LoginController> {
                           : controller.goToRegister,
                       child: Text(
                         controller.isRegisterMode.value
-                            ? 'Da co tai khoan? Dang nhap'
-                            : 'Chua co tai khoan? Dang ky',
+                            ? 'Đã có tài khoản? Đăng nhập'
+                            : 'Chưa có tài khoản? Đăng ký',
                         style: const TextStyle(color: Colors.black),
                       ),
                     ),

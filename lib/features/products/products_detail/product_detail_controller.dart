@@ -9,6 +9,7 @@ import 'package:project_shop/data/response_models/products/product_attribute_mod
 import 'package:project_shop/data/response_models/products/product_rating_model.dart';
 import 'package:project_shop/data/response_models/products/products_model.dart';
 import 'package:project_shop/data/secure_storage/secure_storage.dart';
+import 'package:project_shop/features/cart/cart_controller.dart';
 import 'package:project_shop/features/wishlist/wish_list_controller.dart';
 import 'package:project_shop/routes/app_routes.dart';
 
@@ -27,6 +28,9 @@ class ProductDetailController extends BaseController {
   final _productsRepository = Get.find<ProductsRepository>();
   final ApiService apiService = Get.find();
   final SecureStorage secureStorage = Get.find();
+  final CartController cartController = Get.isRegistered<CartController>()
+      ? Get.find<CartController>()
+      : Get.put(CartController(), permanent: true);
 
   final RxInt selectedIndex = 0.obs;
 
@@ -62,7 +66,7 @@ class ProductDetailController extends BaseController {
   bool get canReviewProduct => ratingSummary?.canReview == true;
   String get reviewDeniedMessage =>
       ratingSummary?.reviewDeniedMessage ??
-      'Chi khach hang da nhan don thanh cong moi co the danh gia san pham.';
+      'Chi khach hang da nhan don thành công moi co the danh gia sản phẩm.';
 
   final RxMap<int, int> selectedAttributes = <int, int>{}.obs;
 
@@ -196,7 +200,7 @@ class ProductDetailController extends BaseController {
         ratingPhoneController.clear();
         ratingCommentController.clear();
         selectedRating.value = 5.0;
-        Get.snackbar('Danh gia', 'Da gui danh gia san pham.');
+        Get.snackbar('Danh gia', 'Da gui danh gia sản phẩm.');
         await getProductRatings();
       },
     );
@@ -231,13 +235,13 @@ class ProductDetailController extends BaseController {
     }
 
     if (!_hasSelectedAllAttributes) {
-      Get.snackbar('Gio hang', 'Vui long chon day du phan loai san pham.');
+      Get.snackbar('Giỏ hàng', 'Vui lòng chọn day du phan loai sản phẩm.');
       return;
     }
 
     cartLoading.value = true;
     try {
-      await apiService.addCartItem({
+      final response = await apiService.addCartItem({
         'product_id': product!.id,
         'quantity': quantity.value,
         'attribute_name_id': selectedAttributes.keys.isEmpty
@@ -245,8 +249,9 @@ class ProductDetailController extends BaseController {
             : selectedAttributes.keys.first,
         'attribute_ids': selectedAttributes.values.toList(),
       });
+      cartController.setCart(response.data);
 
-      Get.snackbar('Gio hang', 'Da them san pham vao gio hang.');
+      Get.snackbar('Giỏ hàng', 'Đã thêm sản phẩm vao Giỏ hàng.');
       if (Get.isBottomSheetOpen == true) {
         Get.back();
       }
@@ -254,7 +259,7 @@ class ProductDetailController extends BaseController {
         Get.toNamed(Routes.cart);
       }
     } catch (error) {
-      Get.snackbar('Gio hang', 'Khong the them san pham vao gio hang.');
+      Get.snackbar('Giỏ hàng', 'Khong the them sản phẩm vao Giỏ hàng.');
     } finally {
       cartLoading.value = false;
     }

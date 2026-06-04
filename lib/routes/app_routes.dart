@@ -9,8 +9,11 @@ abstract class Routes {
   static const checkout = '/checkout';
   static const orders = '/orders';
   static const addresses = '/addresses';
+  static const addressForm = '/addresses/form';
   static const categories = '/categories';
   static const productDetail = '/productdetail';
+  static const productReview = '/product-review';
   static const article = '/article';
   static const articleDetail = '/article-detail';
+  static const chat = '/chat';
 }

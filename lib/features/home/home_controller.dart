@@ -8,6 +8,7 @@ import 'package:project_shop/data/repository/products_action/products_repository
 import 'package:project_shop/data/response_models/categories/category_model.dart';
 import 'package:project_shop/data/response_models/products/products_model.dart';
 import 'package:project_shop/data/secure_storage/share_preference_manager.dart';
+import 'package:project_shop/features/cart/cart_controller.dart';
 import 'package:project_shop/features/wishlist/wish_list_controller.dart';
 import 'package:project_shop/utils/constant.dart';
 
@@ -23,6 +24,7 @@ class HomeController extends BaseController {
   final _productsRepository = Get.find<ProductsRepository>();
 
   final WishListController wishListController = Get.find();
+  final CartController cartController = Get.find();
 
   final List<String> listImgCarousel = [
     'https://images.unsplash.com/photo-1520342868574-5fa3804e551c?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=6ff92caffcdd63681a35134a6770ed3b&auto=format&fit=crop&w=1951&q=80',
@@ -74,6 +76,10 @@ class HomeController extends BaseController {
     getBanner();
     getCategories();
     getProducts();
+    cartController.getCart(
+      redirectIfUnauthenticated: false,
+      showErrors: false,
+    );
     super.onInit();
   }
 
@@ -81,6 +87,10 @@ class HomeController extends BaseController {
     await getBanner();
     await getCategories();
     await getProducts();
+    await cartController.getCart(
+      redirectIfUnauthenticated: false,
+      showErrors: false,
+    );
   }
 
   void selectCategory({required int index, int? categoryId}) {

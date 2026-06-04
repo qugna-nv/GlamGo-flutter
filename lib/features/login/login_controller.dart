@@ -36,7 +36,7 @@ class LoginController extends BaseController {
       await secureStorage.saveTokens(token);
       _goAfterAuth();
     } catch (error) {
-      Get.snackbar('Dang nhap that bai', _getErrorMessage(error));
+      Get.snackbar('Dang nhap thất bại', _getErrorMessage(error));
     } finally {
       isLoading.value = false;
     }
@@ -64,7 +64,7 @@ class LoginController extends BaseController {
       await secureStorage.saveTokens(token);
       _goAfterAuth();
     } catch (error) {
-      Get.snackbar('Dang ky that bai', _getErrorMessage(error));
+      Get.snackbar('Dang ky thất bại', _getErrorMessage(error));
     } finally {
       isLoading.value = false;
     }
@@ -136,10 +136,10 @@ class LoginController extends BaseController {
             return first.first.toString();
           }
         }
-        return data['message']?.toString() ?? 'Co loi xay ra.';
+        return data['message']?.toString() ?? 'Có lỗi xảy ra.';
       }
     }
-    return 'Co loi xay ra.';
+    return 'Có lỗi xảy ra.';
   }
 
   @override

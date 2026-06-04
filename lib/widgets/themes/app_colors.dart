@@ -142,6 +142,7 @@ class ColorName {
   static const blue29 = Color(0xff0284C7);
   static const blue30 = Color(0xffE0F2FE);
   static const blue31 = Color(0xff0A0A17);
+  static const blue32 = Color(0xFF1B6EFB);
 
   /// Color green
   static const green1 = Color(0xff002817);
@@ -385,6 +386,10 @@ class ColorName {
   static const frameTabletColor = Color(0xffF3F4F6);
   static const neutralLight12 = Color(0xffE1E3E8);
   static const blueLight = Color(0xffF0F8FF);
+  static const Color textPrimaryLight = Color(0xFF0F172A);
+  static const Color dividerLight = Color(0xFFE2E8F0);
+  static const Color inputFillLight = Color(0xFFF8FAFC);
+  static const Color hint = Color(0xFFCBD5E1);
 
   /// Dark
   static const primaryDarkTextColor = Color(0xffDCDCDC);
@@ -407,6 +412,7 @@ class ColorName {
   static const neutralTablet = Color(0xff374151);
   static const iconSecondary = Color(0xff1F2937);
   static const backgroundTablet = Color(0xffE5E7EB);
+  static const black54 = Color(0x8A000000);
 
   /// Color: #F2F2F2
   static const Color concrete = Color(0xFFF2F2F2);

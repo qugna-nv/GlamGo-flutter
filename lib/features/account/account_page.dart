@@ -144,7 +144,14 @@ class AccountPage extends GetView<AccountController> {
           SimpleRowWidget(
             padding: EdgeInsets.symmetric(vertical: 12, horizontal: 4),
             contentFirst: 'Contact Us'.tr,
-            onTap: () {},
+            onTap: () {
+              if (!controller.isAuthenticated.value) {
+                Get.toNamed(Routes.login, arguments: {'redirect': Routes.chat});
+                return;
+              }
+
+              Get.toNamed(Routes.chat);
+            },
             imageFirst: Assets.icons.icContactBook,
           ),
           SimpleRowWidget(

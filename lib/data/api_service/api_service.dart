@@ -5,6 +5,7 @@ import 'package:project_shop/data/response_models/article/article_model.dart';
 import 'package:project_shop/data/response_models/auth/auth_response.dart';
 import 'package:project_shop/data/response_models/address/address_model.dart';
 import 'package:project_shop/data/response_models/cart/cart_model.dart';
+import 'package:project_shop/data/response_models/chat/chat_model.dart';
 import 'package:project_shop/data/response_models/categories/category_model.dart';
 import 'package:project_shop/data/response_models/orders/order_model.dart';
 import 'package:project_shop/data/response_models/products/product_rating_model.dart';
@@ -32,6 +33,19 @@ abstract class ApiService {
   @GET(ProductsAction.getProductDetail)
   Future<BaseResponse<ProductsModel>> getProductDetail(
       @Query("id") int? productId);
+
+  @GET(FavoriteAction.favorites)
+  Future<BaseResponse<List<ProductsModel>>> getFavoriteProducts();
+
+  @POST('/favorites/{productId}')
+  Future<BaseResponse<ProductsModel>> addFavoriteProduct(
+    @Path('productId') int productId,
+  );
+
+  @DELETE('/favorites/{productId}')
+  Future<BaseResponse<dynamic>> removeFavoriteProduct(
+    @Path('productId') int productId,
+  );
 
   @GET('/products/{id}/ratings')
   Future<BaseResponse<ProductRatingResponse>> getProductRatings(
@@ -105,7 +119,9 @@ abstract class ApiService {
   Future<BaseResponse<CartModel>> clearCart();
 
   @GET(OrderAction.orders)
-  Future<BaseResponse<OrderPaginationModel>> getOrders();
+  Future<BaseResponse<OrderPaginationModel>> getOrders(
+    @Query('status') int? status,
+  );
 
   @GET('/orders/{id}')
   Future<BaseResponse<OrderDetailModel>> getOrderDetail(@Path('id') int id);
@@ -116,4 +132,18 @@ abstract class ApiService {
 
   @POST('/orders/{id}/cancel')
   Future<BaseResponse<OrderSummaryModel>> cancelOrder(@Path('id') int id);
+
+  @GET(ChatAction.messages)
+  Future<BaseResponse<ChatThreadModel>> getChatMessages();
+
+  @MultiPart()
+  @POST(ChatAction.messages)
+  Future<BaseResponse<ChatMessageModel>> sendChatMessage(
+    @Part(name: 'message') String? message,
+    @Part(name: 'file') MultipartFile? file,
+  );
+
+  @POST(ChatAction.broadcastingAuth)
+  Future<Map<String, dynamic>> authorizeChatChannel(
+      @Body() Map<String, dynamic> body);
 }

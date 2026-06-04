@@ -1,6 +1,6 @@
 import 'package:project_shop/gen/assets.gen.dart';
 
-enum MainScreenEnum { home, category, wishlist,article, account }
+enum MainScreenEnum { home, category, wishlist, article, account }
 
 extension MainScreenEnumExtension on MainScreenEnum {
   String get iconPath {
@@ -27,9 +27,38 @@ extension MainScreenEnumExtension on MainScreenEnum {
       case MainScreenEnum.wishlist:
         return 'Yêu Thích';
       case MainScreenEnum.article:
-        return 'Bài báo';  
+        return 'Bài báo';
       case MainScreenEnum.account:
         return 'Thông tin';
+    }
+  }
+}
+
+enum AddressType {
+  home,
+  office,
+  company,
+  relative,
+  other,
+}
+
+extension AddressTypeX on AddressType {
+  String get label {
+    switch (this) {
+      case AddressType.home:
+        return 'Nhà riêng';
+
+      case AddressType.office:
+        return 'Văn phòng';
+
+      case AddressType.company:
+        return 'Công ty';
+
+      case AddressType.relative:
+        return 'Người thân';
+
+      case AddressType.other:
+        return 'Khác';
     }
   }
 }

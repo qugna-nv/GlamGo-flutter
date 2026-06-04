@@ -72,19 +72,26 @@ class AddressController extends BaseController {
     }
   }
 
-  Future<void> setDefault(AddressModel address) async {
-    if (address.id == null || address.isDefault) return;
+  Future<bool> setDefault(AddressModel address) async {
+    if (address.id == null) return false;
+    if (address.isDefault) return true;
 
     try {
       await apiService.setDefaultAddress(address.id!);
       await _refreshAfterMutation();
+      return true;
     } catch (error) {
       Get.snackbar('Dia chi', _getErrorMessage(error));
+      return false;
     }
   }
 
   Future<void> deleteAddress(AddressModel address) async {
     if (address.id == null) return;
+    if (address.isDefault) {
+      Get.snackbar('Dia chi', 'Khong the xoa dia chi mac dinh.');
+      return;
+    }
 
     try {
       await apiService.deleteAddress(address.id!);
@@ -112,10 +119,10 @@ class AddressController extends BaseController {
             return first.first.toString();
           }
         }
-        return data['message']?.toString() ?? 'Co loi xay ra.';
+        return data['message']?.toString() ?? 'Có lỗi xảy ra.';
       }
     }
 
-    return 'Co loi xay ra.';
+    return 'Có lỗi xảy ra.';
   }
 }
