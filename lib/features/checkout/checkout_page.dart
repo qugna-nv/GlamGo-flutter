@@ -7,6 +7,7 @@ import 'package:project_shop/features/checkout/checkout_controller.dart';
 import 'package:project_shop/gen/assets.gen.dart';
 import 'package:project_shop/utils/app_field_group.dart';
 import 'package:project_shop/utils/app_text_field.dart';
+import 'package:project_shop/utils/payment_method.dart';
 import 'package:project_shop/widgets/button/normal_button.dart';
 import 'package:project_shop/widgets/icon_widget/icon_widget.dart';
 import 'package:project_shop/widgets/image_base/base_image_widget.dart';
@@ -29,7 +30,7 @@ class CheckoutPage extends GetView<CheckoutController> {
         }
 
         if (controller.checkoutItems.isEmpty) {
-          return const Center(child: Text('Chua chon sản phẩm nao.'));
+          return const Center(child: Text('Chưa chọn sản phẩm nào.'));
         }
 
         return ListView(
@@ -39,8 +40,8 @@ class CheckoutPage extends GetView<CheckoutController> {
               _MissingAddress(
                 onAdd: controller.manageAddresses,
                 message: controller.addresses.isEmpty
-                    ? 'Ban chua co dia chi giao hang.'
-                    : 'Ban chua co dia chi mac dinh.',
+                    ? 'Bạn chưa có địa chỉ giao hàng.'
+                    : 'Bạn chưa có địa chỉ mặc định.',
               )
             else
               _DefaultAddress(
@@ -70,6 +71,8 @@ class CheckoutPage extends GetView<CheckoutController> {
               ),
             ),
             const SizedBox(height: 18),
+            _PaymentMethodSelector(controller: controller),
+            const SizedBox(height: 18),
             _PriceSummary(controller: controller),
           ],
         );
@@ -98,7 +101,7 @@ class CheckoutPage extends GetView<CheckoutController> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Tong thanh toan'),
+                    const Text('Tổng thanh toán'),
                     Text(
                       Utils.I.formatCurrency(controller.checkoutTotalPrice),
                       style: Styles.normalTextW700(
@@ -111,7 +114,7 @@ class CheckoutPage extends GetView<CheckoutController> {
                 width: 172,
                 child: IButton.primaryNormal(
                   height: 46,
-                  title: 'Dat hang',
+                  title: 'Đặt hàng',
                   backgroundColor: ColorName.black,
                   textStyle: Styles.normalTextW600(color: ColorName.white),
                   isLoading: controller.submitting.value,
@@ -153,7 +156,7 @@ class _DefaultAddress extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          address.recipientName ?? 'Nguoi nhan',
+                          address.recipientName ?? 'Người nhận',
                           style: Styles.normalTextW700(size: 14),
                         ),
                         SizedBox(
@@ -195,8 +198,102 @@ class _MissingAddress extends StatelessWidget {
       child: Column(
         children: [
           Text(message),
-          TextButton(onPressed: onAdd, child: const Text('Quan ly dia chi')),
+          TextButton(onPressed: onAdd, child: const Text('Quản lý địa chỉ')),
         ],
+      ),
+    );
+  }
+}
+
+class _PaymentMethodSelector extends StatelessWidget {
+  const _PaymentMethodSelector({required this.controller});
+
+  final CheckoutController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppFieldGroup(
+      label: 'Phương thức thanh toán',
+      child: Obx(
+        () => Column(
+          children: PaymentMethod.values
+              .map(
+                (method) => _PaymentMethodItem(
+                  method: method,
+                  selected: controller.selectedPaymentMethod.value == method,
+                  walletBalance: controller.walletBalance.value,
+                  onTap: () => controller.selectPaymentMethod(method),
+                ),
+              )
+              .toList(),
+        ),
+      ),
+    );
+  }
+}
+
+class _PaymentMethodItem extends StatelessWidget {
+  const _PaymentMethodItem({
+    required this.method,
+    required this.selected,
+    required this.walletBalance,
+    required this.onTap,
+  });
+
+  final PaymentMethod method;
+  final bool selected;
+  final double walletBalance;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: selected ? ColorName.black : ColorName.grey1,
+              width: selected ? 1.2 : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                selected
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_unchecked,
+                color: selected ? ColorName.black : ColorName.grey1,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      method.title,
+                      style: Styles.normalTextW600(size: 14),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      method == PaymentMethod.wallet
+                          ? '${method.description} Số dư: ${Utils.I.formatCurrency(walletBalance)}'
+                          : method.description,
+                      style: Styles.normalText(
+                        size: 12,
+                        color: ColorName.grey1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -239,7 +336,7 @@ class _CheckoutItem extends StatelessWidget {
                   Text(
                     item.attributes
                         .map((attribute) =>
-                            '${attribute.attributeName ?? 'Phan loai'}: ${attribute.attributeValue ?? ''}')
+                            '${attribute.attributeName ?? 'Phân loại'}: ${attribute.attributeValue ?? ''}')
                         .join(', '),
                     style: Styles.normalText(size: 12, color: ColorName.grey1),
                   ),
@@ -266,10 +363,10 @@ class _PriceSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _row('Tam tinh', controller.checkoutSubtotal),
-        _row('Giam gia', controller.cart.value?.discount ?? 0),
+        _row('Tạm tính', controller.checkoutSubtotal),
+        _row('Giảm giá', controller.cart.value?.discount ?? 0),
         const Divider(height: 18),
-        _row('Thanh toan', controller.checkoutTotalPrice, bold: true),
+        _row('Thanh toán', controller.checkoutTotalPrice, bold: true),
       ],
     );
   }

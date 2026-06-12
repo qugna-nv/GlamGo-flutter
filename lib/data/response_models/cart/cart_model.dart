@@ -71,6 +71,9 @@ class CartItemModel {
   @JsonKey(name: 'product_id', fromJson: stringToInt)
   final int productId;
 
+  @JsonKey(name: 'product_variant_id', fromJson: stringToIntNullable)
+  final int? productVariantId;
+
   @JsonKey(name: 'product_name')
   final String? productName;
 
@@ -95,6 +98,9 @@ class CartItemModel {
   @JsonKey(fromJson: stringToDouble)
   final double price;
 
+  @JsonKey(name: 'stock_quantity', fromJson: stringToIntNullable)
+  final int? stockQuantity;
+
   @JsonKey(fromJson: stringToInt)
   final int quantity;
 
@@ -104,6 +110,7 @@ class CartItemModel {
   CartItemModel({
     required this.id,
     required this.productId,
+    this.productVariantId,
     this.productName,
     this.productCode,
     this.productImage,
@@ -112,6 +119,7 @@ class CartItemModel {
     required this.attributes,
     this.personaliseName,
     required this.price,
+    this.stockQuantity,
     required this.quantity,
     required this.totalPrice,
   });

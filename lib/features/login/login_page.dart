@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:project_shop/features/login/login_controller.dart';
 import 'package:project_shop/utils/app_text_field.dart';
+import 'package:project_shop/widgets/styles_widget/styles_widget.dart';
 
 class LoginPage extends GetView<LoginController> {
   const LoginPage({super.key});
@@ -9,6 +10,13 @@ class LoginPage extends GetView<LoginController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Đăng nhập',
+          style: Styles.mediumTextW700(),
+        ),
+        centerTitle: true,
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24),

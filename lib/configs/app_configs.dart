@@ -1,23 +1,32 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class AppConfigs {
-  // static String hostUrl = 'http://192.168.1.252:8000';
-  // static String hostUrl = 'http://192.168.0.108:8000';
-  // static String hostUrl = 'http://192.168.1.20:8000';
-  static String hostUrl = 'http://192.168.1.13:8000';
-  static String apiUrl = '/api/v1';
+  static String hostUrl = dotenv.env['HOST_URL']?.trim().isNotEmpty == true
+      ? dotenv.env['HOST_URL']!.trim()
+      : 'http://192.168.1.13:8000';
+  static String apiUrl = dotenv.env['API_URL']?.trim().isNotEmpty == true
+      ? dotenv.env['API_URL']!.trim()
+      : '/api/v1';
   static String baseUrl = '$hostUrl$apiUrl';
 
-  static const oneSignalAppId = 'f4519d4f-1741-40b1-b8b3-a34b04647cff';
-  static const reverbAppKey = String.fromEnvironment(
-    'REVERB_APP_KEY',
-    defaultValue: 'glamgo-local-key',
-  );
-  static const reverbHost = String.fromEnvironment('REVERB_HOST');
-  static const reverbPort =
-      int.fromEnvironment('REVERB_PORT', defaultValue: 8080);
-  static const reverbScheme = String.fromEnvironment(
-    'REVERB_SCHEME',
-    defaultValue: 'http',
-  );
+  static String oneSignalAppId =
+      dotenv.env['ONESIGNAL_APP_ID']?.trim().isNotEmpty == true
+          ? dotenv.env['ONESIGNAL_APP_ID']!.trim()
+          : '';
+  static String reverbAppKey =
+      dotenv.env['REVERB_APP_KEY']?.trim().isNotEmpty == true
+          ? dotenv.env['REVERB_APP_KEY']!.trim()
+          : 'glamgo-local-key';
+  static String reverbHost =
+      dotenv.env['REVERB_HOST']?.trim().isNotEmpty == true
+          ? dotenv.env['REVERB_HOST']!.trim()
+          : '';
+  static int reverbPort =
+      int.tryParse(dotenv.env['REVERB_PORT']?.trim() ?? '') ?? 8080;
+  static String reverbScheme =
+      dotenv.env['REVERB_SCHEME']?.trim().isNotEmpty == true
+          ? dotenv.env['REVERB_SCHEME']!.trim()
+          : 'http';
 
   static Uri get reverbWebSocketUri {
     final host = reverbHost.isEmpty ? Uri.parse(hostUrl).host : reverbHost;
@@ -47,6 +56,8 @@ class CategoryAction {
 
 class ProductsAction {
   static const getProducts = '/products';
+  static const getFeaturedProducts = '/products/featured';
+  static const getRecommendedProducts = '/products/recommended';
   static const getProductsByCategory = '/products/get-products-by-category';
   static const getProductDetail = '/products/get-products-details';
   static String productRatings(int id) => '/products/$id/ratings';
@@ -92,4 +103,10 @@ class AddressAction {
 class ChatAction {
   static const messages = '/chat/messages';
   static const broadcastingAuth = '/broadcasting/auth';
+}
+
+class NotificationAction {
+  static const notifications = '/notifications';
+  static const markAllAsRead = '/notifications/read-all';
+  static String markAsRead(String id) => '/notifications/$id/read';
 }

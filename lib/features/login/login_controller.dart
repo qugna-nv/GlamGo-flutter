@@ -2,9 +2,13 @@ import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:project_shop/base/base_controller.dart';
+import 'package:project_shop/core/notification_service.dart';
 import 'package:project_shop/data/api_service/api_service.dart';
 import 'package:project_shop/data/secure_storage/secure_storage.dart';
+import 'package:project_shop/features/notification/notification_controller.dart';
 import 'package:project_shop/routes/app_routes.dart';
+import 'package:project_shop/widgets/appbar_custom/common_snackbar.dart';
+import 'package:project_shop/widgets/common/toast_widget.dart';
 
 class LoginController extends BaseController {
   final nameController = TextEditingController();
@@ -29,14 +33,26 @@ class LoginController extends BaseController {
       final token = response.data?.token;
 
       if (token == null || token.isEmpty) {
-        Get.snackbar('Loi', 'Khong nhan duoc token dang nhap.');
+        Get.find<ToastWidget>().showToast(
+          Get.context!,
+          title: 'Thất bại',
+          toastStatus: ToastStatus.fail,
+          description: 'Không nhận được token đăng nhập.',
+        );
         return;
       }
 
       await secureStorage.saveTokens(token);
+      await _syncOneSignalUser(response.data?.user?.id);
+      await _refreshNotificationCount();
       _goAfterAuth();
     } catch (error) {
-      Get.snackbar('Dang nhap thất bại', _getErrorMessage(error));
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Thất bại',
+        toastStatus: ToastStatus.fail,
+        description: _getErrorMessage(error),
+      );
     } finally {
       isLoading.value = false;
     }
@@ -57,14 +73,26 @@ class LoginController extends BaseController {
       final token = response.data?.token;
 
       if (token == null || token.isEmpty) {
-        Get.snackbar('Loi', 'Khong nhan duoc token dang ky.');
+        Get.find<ToastWidget>().showToast(
+          Get.context!,
+          title: 'Lỗi',
+          toastStatus: ToastStatus.fail,
+          description: 'Không nhận được token đăng ký.',
+        );
         return;
       }
 
       await secureStorage.saveTokens(token);
+      await _syncOneSignalUser(response.data?.user?.id);
+      await _refreshNotificationCount();
       _goAfterAuth();
     } catch (error) {
-      Get.snackbar('Dang ky thất bại', _getErrorMessage(error));
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Thất bại',
+        toastStatus: ToastStatus.fail,
+        description: _getErrorMessage(error),
+      );
     } finally {
       isLoading.value = false;
     }
@@ -88,6 +116,26 @@ class LoginController extends BaseController {
     }
 
     Get.offAllNamed(Routes.initPage);
+  }
+
+  Future<void> _syncOneSignalUser(int? userId) async {
+    if (Get.isRegistered<NotificationService>()) {
+      if (userId != null) {
+        await Get.find<NotificationService>().login(userId.toString());
+        return;
+      }
+
+      await Get.find<NotificationService>().syncLoggedInUser();
+    }
+  }
+
+  Future<void> _refreshNotificationCount() async {
+    if (Get.isRegistered<NotificationController>()) {
+      await Get.find<NotificationController>().getNotifications(
+        redirectIfUnauthenticated: false,
+        showErrors: false,
+      );
+    }
   }
 
   bool _validateLogin() {

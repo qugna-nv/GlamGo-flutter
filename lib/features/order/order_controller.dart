@@ -5,6 +5,8 @@ import 'package:project_shop/data/api_service/api_service.dart';
 import 'package:project_shop/data/response_models/orders/order_model.dart';
 import 'package:project_shop/data/secure_storage/secure_storage.dart';
 import 'package:project_shop/routes/app_routes.dart';
+import 'package:project_shop/widgets/appbar_custom/common_snackbar.dart';
+import 'package:project_shop/widgets/common/toast_widget.dart';
 
 class OrderStatusTab {
   const OrderStatusTab({required this.label, this.status});
@@ -50,7 +52,12 @@ class OrderController extends BaseController {
       return true;
     }
 
-    Get.snackbar('Dang nhap', 'Vui long dang nhap de xem don hang.');
+    Get.find<ToastWidget>().showToast(
+      Get.context!,
+      title: 'Cảnh báo',
+      toastStatus: ToastStatus.fail,
+      description: 'Vui lòng đăng nhập để xem danh sách đơn hàng',
+    );
     Get.offNamed(Routes.login, arguments: {'redirect': Routes.orders});
     return false;
   }
@@ -70,7 +77,12 @@ class OrderController extends BaseController {
       final response = await apiService.getOrders(selectedTab.status);
       orders.assignAll(response.data?.data ?? []);
     } catch (error) {
-      Get.snackbar('Don hang', _getErrorMessage(error));
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Thất bại',
+        toastStatus: ToastStatus.fail,
+        description: _getErrorMessage(error),
+      );
     } finally {
       isLoading.value = false;
     }
@@ -85,7 +97,12 @@ class OrderController extends BaseController {
       final response = await apiService.getOrderDetail(id);
       selectedOrder.value = response.data;
     } catch (error) {
-      Get.snackbar('Don hang', _getErrorMessage(error));
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Thông báo',
+        toastStatus: ToastStatus.fail,
+        description: _getErrorMessage(error),
+      );
     } finally {
       detailLoading.value = false;
     }
@@ -96,13 +113,23 @@ class OrderController extends BaseController {
 
     try {
       await apiService.cancelOrder(id);
-      Get.snackbar('Don hang', 'Da huy don hang.');
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Thông báo',
+        toastStatus: ToastStatus.fail,
+        description: 'Đã huỷ đơn hàng thành công',
+      );
       await getOrders();
       if (selectedOrder.value?.id == id) {
         await getOrderDetail(id);
       }
     } catch (error) {
-      Get.snackbar('Don hang', _getErrorMessage(error));
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Thông báo',
+        toastStatus: ToastStatus.fail,
+        description: _getErrorMessage(error),
+      );
     }
   }
 
@@ -112,15 +139,26 @@ class OrderController extends BaseController {
     try {
       await apiService.addCartItem({
         'product_id': item.productId,
+        'product_variant_id': item.productVariantId,
         'quantity': item.quantity > 0 ? item.quantity : 1,
         'attribute_name_id': item.attributeNameId,
         'attribute_ids': item.attributes
             .map((attribute) => attribute.attributeValueId)
             .toList(),
       });
-      Get.snackbar('Giỏ hàng', 'Da them sản phẩm vao giỏ hàng.');
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Thành công',
+        toastStatus: ToastStatus.success,
+        description: 'Đã thêm sản phẩm vào giỏ hàng.',
+      );
     } catch (error) {
-      Get.snackbar('Giỏ hàng', _getErrorMessage(error));
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Thất bại',
+        toastStatus: ToastStatus.fail,
+        description: _getErrorMessage(error),
+      );
     }
   }
 
@@ -149,9 +187,9 @@ class OrderController extends BaseController {
     if (error is DioException) {
       final data = error.response?.data;
       if (data is Map<String, dynamic>) {
-        return data['message']?.toString() ?? 'Co loi xay ra.';
+        return data['message']?.toString() ?? 'Có lỗi xảy ra.';
       }
     }
-    return 'Co loi xay ra.';
+    return 'Có lỗi xảy ra.';
   }
 }

@@ -127,41 +127,41 @@ class $AssetsIconsGen {
 
   /// List of all assets
   List<dynamic> get values => [
-    icAddCart,
-    icAddToCart,
-    icArrowRight,
-    icArrowRightNew,
-    icBackgroundLocation,
-    icClear,
-    icClose,
-    icContactBook,
-    icDelete,
-    icDeleteTableV1,
-    icEditDocument,
-    icFailToast,
-    icHeart,
-    icHeartOutlined,
-    icHome,
-    icHomeActive,
-    icHomeOutlined,
-    icInformation,
-    icLeftArrow,
-    icLocation,
-    icLogout,
-    icNotification,
-    icPaper,
-    icPower,
-    icRemoteTable,
-    icSend,
-    icSetting,
-    icShoppingBag,
-    icStar,
-    icStore,
-    icSuccessToast,
-    icUser,
-    icWarningToast,
-    notify,
-  ];
+        icAddCart,
+        icAddToCart,
+        icArrowRight,
+        icArrowRightNew,
+        icBackgroundLocation,
+        icClear,
+        icClose,
+        icContactBook,
+        icDelete,
+        icDeleteTableV1,
+        icEditDocument,
+        icFailToast,
+        icHeart,
+        icHeartOutlined,
+        icHome,
+        icHomeActive,
+        icHomeOutlined,
+        icInformation,
+        icLeftArrow,
+        icLocation,
+        icLogout,
+        icNotification,
+        icPaper,
+        icPower,
+        icRemoteTable,
+        icSend,
+        icSetting,
+        icShoppingBag,
+        icStar,
+        icStore,
+        icSuccessToast,
+        icUser,
+        icWarningToast,
+        notify,
+      ];
 }
 
 class $AssetsImagesGen {
@@ -250,39 +250,48 @@ class $AssetsImagesGen {
   AssetGenImage get wishlistEmpty =>
       const AssetGenImage('assets/images/wishlist_empty.png');
 
+  /// File path: assets/images/icon_warning.png
+  AssetGenImage get icWarrning =>
+      const AssetGenImage('assets/images/icon_warning.png');
+
   /// List of all assets
   List<dynamic> get values => [
-    avatar,
-    banner,
-    biometric,
-    cartEmpty,
-    gift,
-    icHeart,
-    icHeartFill,
-    icLocation,
-    imgPlaceholder,
-    initCarousel,
-    introImage,
-    jinStoreLogo,
-    logo,
-    logoGreen,
-    logoIsland,
-    logoOrange,
-    logoWhite,
-    onboarding1,
-    onboarding2,
-    onboarding3,
-    storeLogo,
-    wishlistEmpty,
-  ];
+        avatar,
+        banner,
+        biometric,
+        cartEmpty,
+        gift,
+        icHeart,
+        icHeartFill,
+        icLocation,
+        imgPlaceholder,
+        initCarousel,
+        introImage,
+        jinStoreLogo,
+        logo,
+        logoGreen,
+        logoIsland,
+        logoOrange,
+        logoWhite,
+        onboarding1,
+        onboarding2,
+        onboarding3,
+        storeLogo,
+        wishlistEmpty,
+        icWarrning,
+      ];
 }
 
 class Assets {
   const Assets._();
 
+  static const String aEnv = '.env';
   static const $AssetsAddressGen address = $AssetsAddressGen();
   static const $AssetsIconsGen icons = $AssetsIconsGen();
   static const $AssetsImagesGen images = $AssetsImagesGen();
+
+  /// List of all assets
+  static List<String> get values => [aEnv];
 }
 
 class AssetGenImage {

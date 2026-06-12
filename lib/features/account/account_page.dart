@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:project_shop/features/account/account_controller.dart';
+import 'package:project_shop/features/notification/notification_controller.dart';
 import 'package:project_shop/gen/assets.gen.dart';
+import 'package:project_shop/widgets/button/normal_button.dart';
 import 'package:project_shop/widgets/themes/app_colors.dart';
 import 'package:project_shop/routes/app_routes.dart';
 import 'package:project_shop/widgets/appbar_custom/custom_app_bar.dart';
 import 'package:project_shop/widgets/icon_widget/icon_widget.dart';
 import 'package:project_shop/widgets/inkwell/default_ink_well.dart';
-import 'package:project_shop/widgets/shimmer/shimmer_products.dart';
 import 'package:project_shop/widgets/simple_rows/simple_row_widget.dart';
 import 'package:project_shop/widgets/styles_widget/styles_widget.dart';
 
@@ -18,39 +19,82 @@ class AccountPage extends GetView<AccountController> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Scaffold(
-        appBar: CustomAppBar(
-          label: 'Thiết lập',
-          showBackButton: false,
-        ),
-        body: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 20.w),
-          child: Column(
-            children: [
-              SizedBox(height: 16.w),
-              _userInfo(),
-              SizedBox(
-                height: 16.w,
-              ),
-              _cardAccount(),
-              SizedBox(height: 16.w),
-              _cardSupport(),
-              SizedBox(height: 16.w),
-              // IButton.primaryNormal(
-              //   contentPadding: EdgeInsets.symmetric(horizontal: 28.w),
-              //   title: 'Đăng xuất'.tr,
-              //   onPress: () {
-              //// mainController?.logout();
-              //   },
-              //   iconFirst: Assets.icons.icLogout,
-              // ),
-              // SizedBox(
-              //   height: 32.w,
-              // )
-            ],
+      child: Obx(() {
+        return Scaffold(
+          appBar: CustomAppBar(
+            label: controller.isAuthenticated.value ? 'Thiết lập' : '',
+            showBackButton: false,
           ),
-        ),
-      ),
+          body: controller.isAuthChecking.value
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
+              : !controller.isAuthenticated.value
+                  ? Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.warning_amber_rounded,
+                              size: 72,
+                              color: Colors.orange,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Vui lòng đăng nhập để tiếp tục',
+                              textAlign: TextAlign.center,
+                              style: Styles.normalTextW500(),
+                            ),
+                            const SizedBox(height: 24),
+                            SizedBox(
+                              width: double.infinity,
+                              child: IButton.primaryNormal(
+                                title: 'Đăng nhập',
+                                backgroundColor: ColorName.black,
+                                textColor: ColorName.white,
+                                onPress: () {
+                                  Get.toNamed(Routes.login);
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : RefreshIndicator(
+                      onRefresh: () async {
+                        await controller.loadCurrentUser(force: true);
+                      },
+                      child: SingleChildScrollView(
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
+                        child: Column(
+                          children: [
+                            SizedBox(height: 16.w),
+                            _userInfo(),
+                            SizedBox(height: 16.w),
+                            _cardAccount(),
+                            SizedBox(height: 16.w),
+                            _cardSupport(context),
+                            SizedBox(height: 16.w),
+                            IButton.primaryNormal(
+                              contentPadding:
+                                  EdgeInsets.symmetric(horizontal: 28.w),
+                              title: 'Đăng xuất'.tr,
+                              onPress: () async {
+                                await controller.logout();
+                                Get.offAllNamed(Routes.initPage);
+                              },
+                              iconFirst: Assets.icons.icLogout,
+                            ),
+                            SizedBox(height: 32.w),
+                          ],
+                        ),
+                      ),
+                    ),
+        );
+      }),
     );
   }
 
@@ -61,13 +105,13 @@ class AccountPage extends GetView<AccountController> {
       final isAuthenticated = controller.isAuthenticated.value;
       final hasError = controller.errorMessage.value.isNotEmpty;
       final name = user?.name ??
-          (isAuthenticated ? 'Tai khoan cua ban' : 'Ban chua dang nhap');
+          (isAuthenticated ? 'Tài khoản của bạn' : 'Bạn chưa đăng nhập');
       final detail = user?.email ??
           (hasError
               ? controller.errorMessage.value
               : isAuthenticated
-                  ? 'Dang tai thong tin...'
-                  : 'Dang nhap de xem thong tin');
+                  ? 'Đang tải thông tin...'
+                  : 'Đăng nhập để xem thông tin');
 
       return Container(
         padding: EdgeInsets.symmetric(horizontal: 8),
@@ -121,7 +165,15 @@ class AccountPage extends GetView<AccountController> {
                     borderRadius: BorderRadius.circular(24)),
                 child: DefaultInkWell(
                     child: IconWidget.ic24(path: Assets.icons.icEditDocument),
-                    onTap: () {}),
+                    onTap: () {
+                      if (!controller.isAuthenticated.value) {
+                        Get.toNamed(Routes.login,
+                            arguments: {'redirect': Routes.accountDetails});
+                        return;
+                      }
+
+                      Get.toNamed(Routes.accountDetails);
+                    }),
               )
           ],
         ),
@@ -129,7 +181,7 @@ class AccountPage extends GetView<AccountController> {
     });
   }
 
-  Widget _cardSupport() {
+  Widget _cardSupport(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 16.w, horizontal: 12.w),
       decoration: BoxDecoration(
@@ -162,10 +214,8 @@ class AccountPage extends GetView<AccountController> {
           ),
           SimpleRowWidget(
             padding: EdgeInsets.symmetric(vertical: 12, horizontal: 4),
-            contentFirst: 'Feedbcak'.tr,
-            onTap: () {
-              Get.toNamed(Routes.login);
-            },
+            contentFirst: 'Feedback'.tr,
+            onTap: () {},
             imageFirst: Assets.icons.icSend,
           ),
           // SimpleRowWidget(
@@ -203,15 +253,31 @@ class AccountPage extends GetView<AccountController> {
           SimpleRowWidget(
             contentFirst: 'Account Details'.tr,
             onTap: () {
-              Navigator.push(Get.context!,
-                  MaterialPageRoute(builder: (context) => ShimmerProducts()));
+              if (!controller.isAuthenticated.value) {
+                Get.toNamed(Routes.login,
+                    arguments: {'redirect': Routes.accountDetails});
+                return;
+              }
+
+              Get.toNamed(Routes.accountDetails);
             },
             imageFirst: Assets.icons.icUser,
           ),
           SimpleRowWidget(
             contentFirst: 'Notification'.tr,
-            onTap: () {},
+            onTap: () {
+              if (!controller.isAuthenticated.value) {
+                Get.toNamed(
+                  Routes.login,
+                  arguments: {'redirect': Routes.notifications},
+                );
+                return;
+              }
+
+              Get.toNamed(Routes.notifications);
+            },
             imageFirst: Assets.icons.icNotification,
+            widget: _notificationTrailing(),
           ),
           SimpleRowWidget(
             contentFirst: 'Order'.tr,
@@ -238,22 +304,56 @@ class AccountPage extends GetView<AccountController> {
             onTap: () {},
             imageFirst: Assets.icons.icDeleteTableV1,
           ),
-          Obx(() => SimpleRowWidget(
-                contentFirst:
-                    (controller.isAuthenticated.value ? 'Logout' : 'Login').tr,
-                onTap: () async {
-                  if (!controller.isAuthenticated.value) {
-                    Get.toNamed(Routes.login);
-                    return;
-                  }
+          // Obx(() => SimpleRowWidget(
+          //       contentFirst:
+          //           (controller.isAuthenticated.value ? 'Logout' : 'Login').tr,
+          //       onTap: () async {
+          //         if (!controller.isAuthenticated.value) {
+          //           Get.toNamed(Routes.login);
+          //           return;
+          //         }
 
-                  await controller.logout();
-                  Get.offAllNamed(Routes.initPage);
-                },
-                imageFirst: Assets.icons.icPower,
-              )),
+          //         await controller.logout();
+          //         Get.offAllNamed(Routes.initPage);
+          //       },
+          //       imageFirst: Assets.icons.icPower,
+          //     )),
         ],
       ),
     );
+  }
+
+  Widget _notificationTrailing() {
+    final notificationController = Get.find<NotificationController>();
+
+    return Obx(() {
+      final count = notificationController.unreadCount.value;
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (count > 0) ...[
+            Container(
+              constraints: const BoxConstraints(minWidth: 22, minHeight: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 7),
+              decoration: BoxDecoration(
+                color: ColorName.red14,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                count > 99 ? '99+' : '$count',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
+          IconWidget.ic24(path: Assets.icons.icArrowRightNew),
+        ],
+      );
+    });
   }
 }

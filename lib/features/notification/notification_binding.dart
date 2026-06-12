@@ -1,13 +1,11 @@
 import 'package:get/get.dart';
-import 'package:project_shop/features/account/account_controller.dart';
 import 'package:project_shop/features/notification/notification_controller.dart';
 
-class HomeBinding extends Bindings {
+class NotificationBinding extends Bindings {
   @override
   void dependencies() {
     if (!Get.isRegistered<NotificationController>()) {
-      Get.lazyPut(() => NotificationController(), fenix: true);
+      Get.lazyPut(() => NotificationController());
     }
-    Get.lazyPut(() => AccountController());
   }
 }

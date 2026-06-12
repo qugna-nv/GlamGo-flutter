@@ -1,13 +1,18 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart' as dio;
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:project_shop/configs/app_configs.dart';
 import 'package:project_shop/base/base_controller.dart';
 import 'package:project_shop/data/api_service/api_service.dart';
 import 'package:project_shop/data/response_models/chat/chat_model.dart';
 import 'package:project_shop/data/secure_storage/secure_storage.dart';
 import 'package:project_shop/features/chat/chat_realtime_service.dart';
 import 'package:project_shop/routes/app_routes.dart';
+import 'package:project_shop/widgets/appbar_custom/common_snackbar.dart';
+import 'package:project_shop/widgets/common/toast_widget.dart';
 
 class ChatController extends BaseController {
   final ApiService apiService = Get.find();
@@ -16,6 +21,7 @@ class ChatController extends BaseController {
   final messages = <ChatMessageModel>[].obs;
   final sending = false.obs;
   final realtimeConnected = false.obs;
+  final realtimeError = ''.obs;
   final Rxn<XFile> selectedFile = Rxn<XFile>();
   final selectedFileType = ''.obs;
   final handledBy = 'bot'.obs;
@@ -53,7 +59,12 @@ class ChatController extends BaseController {
       adminName.value = thread.session?.adminName;
       await _connectRealtime(thread.channel);
     } catch (error) {
-      Get.snackbar('Tin nhan', _errorMessage(error));
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Thất bại',
+        toastStatus: ToastStatus.fail,
+        description: _errorMessage(error),
+      );
     } finally {
       isLoading.value = false;
     }
@@ -67,10 +78,19 @@ class ChatController extends BaseController {
         privateChannel: channel,
         onMessage: _addMessage,
         onDisconnected: () => realtimeConnected.value = false,
+        onError: (error) {
+          realtimeError.value = error.toString();
+        },
       );
       realtimeConnected.value = true;
-    } catch (_) {
+      realtimeError.value = '';
+    } catch (error) {
       realtimeConnected.value = false;
+      realtimeError.value = error.toString();
+      Get.snackbar(
+        'Socket',
+        'Không thể kết nối được ${AppConfigs.reverbWebSocketUri}: $error',
+      );
     }
   }
 
@@ -83,14 +103,19 @@ class ChatController extends BaseController {
     try {
       final response = await apiService.sendChatMessage(
         content.isEmpty ? null : content,
-        file == null ? null : await dio.MultipartFile.fromFile(file.path),
+        file == null ? null : File(file.path),
       );
       final message = response.data;
       if (message != null) _addMessage(message);
       messageController.clear();
       clearSelectedFile();
     } catch (error) {
-      Get.snackbar('Tin nhan', _errorMessage(error));
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Thất bại',
+        toastStatus: ToastStatus.fail,
+        description: _errorMessage(error),
+      );
     } finally {
       sending.value = false;
     }

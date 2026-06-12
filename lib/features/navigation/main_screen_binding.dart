@@ -7,6 +7,7 @@ import 'package:project_shop/features/cart/cart_controller.dart';
 import 'package:project_shop/features/category/category_controller.dart';
 import 'package:project_shop/features/home/home_controller.dart';
 import 'package:project_shop/features/navigation/main_screen_controller.dart';
+import 'package:project_shop/features/notification/notification_controller.dart';
 import 'package:project_shop/features/wishlist/wish_list_controller.dart';
 
 class MainScreenBinding extends Bindings {
@@ -17,6 +18,9 @@ class MainScreenBinding extends Bindings {
     Get.lazyPut(() => ProductsRepository());
     Get.lazyPut(() => CartController(), fenix: true);
     Get.lazyPut(() => HomeController());
+    if (!Get.isRegistered<NotificationController>()) {
+      Get.lazyPut(() => NotificationController(), fenix: true);
+    }
     // Get.put(HomeController());
     Get.lazyPut(() => CategoryController());
     Get.lazyPut(() => WishListController());

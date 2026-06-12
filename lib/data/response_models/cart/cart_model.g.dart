@@ -35,6 +35,7 @@ CartItemModel _$CartItemModelFromJson(Map<String, dynamic> json) =>
     CartItemModel(
       id: stringToInt(json['id']),
       productId: stringToInt(json['product_id']),
+      productVariantId: stringToIntNullable(json['product_variant_id']),
       productName: json['product_name'] as String?,
       productCode: json['product_code'] as String?,
       productImage: json['product_image'] as String?,
@@ -47,6 +48,7 @@ CartItemModel _$CartItemModelFromJson(Map<String, dynamic> json) =>
           [],
       personaliseName: json['personalise_name'] as String?,
       price: stringToDouble(json['price']),
+      stockQuantity: stringToIntNullable(json['stock_quantity']),
       quantity: stringToInt(json['quantity']),
       totalPrice: stringToDouble(json['total_price']),
     );
@@ -55,6 +57,7 @@ Map<String, dynamic> _$CartItemModelToJson(CartItemModel instance) =>
     <String, dynamic>{
       'id': instance.id,
       'product_id': instance.productId,
+      'product_variant_id': instance.productVariantId,
       'product_name': instance.productName,
       'product_code': instance.productCode,
       'product_image': instance.productImage,
@@ -63,6 +66,7 @@ Map<String, dynamic> _$CartItemModelToJson(CartItemModel instance) =>
       'attributes': instance.attributes,
       'personalise_name': instance.personaliseName,
       'price': instance.price,
+      'stock_quantity': instance.stockQuantity,
       'quantity': instance.quantity,
       'total_price': instance.totalPrice,
     };

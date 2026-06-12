@@ -57,13 +57,20 @@ class ProductAttributeBottomSheet extends StatelessWidget {
               _QuantitySelector(controller: controller),
               const SizedBox(height: 12),
               Obx(
-                () => IButton(
-                  title: title,
-                  color: ColorName.black,
-                  textStyle: Styles.normalTextW600(color: ColorName.white),
-                  isLoading: controller.cartLoading.value,
-                  onPress: onTap,
-                ),
+                () {
+                  final disabled = !controller.canSubmitCartSelection;
+                  final buttonTitle =
+                      disabled ? controller.cartSelectionButtonTitle : title;
+
+                  return IButton(
+                    title: buttonTitle,
+                    color: ColorName.black,
+                    textStyle: Styles.normalTextW600(color: ColorName.white),
+                    isLoading: controller.cartLoading.value,
+                    isDisable: disabled,
+                    onPress: onTap,
+                  );
+                },
               ),
             ],
           ),
@@ -105,14 +112,27 @@ class _ProductSheetInfo extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  Utils.I.formatCurrency(
-                    ((product?.priceSale ?? 0) > 0)
-                        ? product?.priceSale ?? 0
-                        : product?.price ?? 0,
+                Obx(
+                  () => Text(
+                    Utils.I.formatCurrency(
+                      controller.currentDisplayPrice,
+                    ),
+                    style: Styles.normalTextW700(color: ColorName.red14),
                   ),
-                  style: Styles.normalTextW700(color: ColorName.red14),
                 ),
+                Obx(() {
+                  final stock = controller.selectedStockQuantity;
+                  if (stock == null) return const SizedBox.shrink();
+
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      'Ton kho: $stock',
+                      style:
+                          Styles.normalText(size: 12, color: ColorName.grey1),
+                    ),
+                  );
+                }),
               ],
             ),
           ),

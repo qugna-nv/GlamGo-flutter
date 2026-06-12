@@ -44,6 +44,11 @@ ProductsModel _$ProductsModelFromJson(Map<String, dynamic> json) =>
       sameCategory: (json['sameCategory'] as List<dynamic>?)
           ?.map((e) => SameCategoryModel.fromJson(e as Map<String, dynamic>))
           .toList(),
+      variants: (json['variants'] as List<dynamic>?)
+              ?.map((e) =>
+                  ProductVariantModel.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
     );
 
 Map<String, dynamic> _$ProductsModelToJson(ProductsModel instance) =>
@@ -71,6 +76,57 @@ Map<String, dynamic> _$ProductsModelToJson(ProductsModel instance) =>
       'product_images': instance.productImages,
       'attribute': instance.attribute,
       'sameCategory': instance.sameCategory,
+      'variants': instance.variants,
+    };
+
+ProductVariantModel _$ProductVariantModelFromJson(Map<String, dynamic> json) =>
+    ProductVariantModel(
+      id: (json['id'] as num?)?.toInt(),
+      productId: (json['product_id'] as num?)?.toInt(),
+      sku: json['sku'] as String?,
+      price: stringToDouble(json['price']),
+      quantity: (json['quantity'] as num?)?.toInt(),
+      status: (json['status'] as num?)?.toInt(),
+      attributeIds: (json['attribute_ids'] as List<dynamic>?)
+              ?.map((e) => (e as num).toInt())
+              .toList() ??
+          [],
+      attributes: (json['attributes'] as List<dynamic>?)
+              ?.map((e) => ProductVariantAttributeModel.fromJson(
+                  e as Map<String, dynamic>))
+              .toList() ??
+          [],
+    );
+
+Map<String, dynamic> _$ProductVariantModelToJson(
+        ProductVariantModel instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'product_id': instance.productId,
+      'sku': instance.sku,
+      'price': instance.price,
+      'quantity': instance.quantity,
+      'status': instance.status,
+      'attribute_ids': instance.attributeIds,
+      'attributes': instance.attributes,
+    };
+
+ProductVariantAttributeModel _$ProductVariantAttributeModelFromJson(
+        Map<String, dynamic> json) =>
+    ProductVariantAttributeModel(
+      attributeId: (json['attribute_id'] as num?)?.toInt(),
+      attributeName: json['attribute_name'] as String?,
+      attributeValueId: (json['attribute_value_id'] as num?)?.toInt(),
+      attributeValue: json['attribute_value'] as String?,
+    );
+
+Map<String, dynamic> _$ProductVariantAttributeModelToJson(
+        ProductVariantAttributeModel instance) =>
+    <String, dynamic>{
+      'attribute_id': instance.attributeId,
+      'attribute_name': instance.attributeName,
+      'attribute_value_id': instance.attributeValueId,
+      'attribute_value': instance.attributeValue,
     };
 
 ProductImage _$ProductImageFromJson(Map<String, dynamic> json) => ProductImage(

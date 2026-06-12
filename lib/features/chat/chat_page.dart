@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:project_shop/data/response_models/chat/chat_model.dart';
 import 'package:project_shop/features/chat/chat_controller.dart';
+import 'package:project_shop/utils/app_text_field.dart';
 import 'package:project_shop/widgets/themes/app_colors.dart';
 import 'package:video_player/video_player.dart';
 
@@ -23,11 +24,11 @@ class ChatPage extends GetView<ChatController> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Ho tro truc tuyen'),
+              const Text('Hỗ trợ trực tuyến'),
               Text(
                 handledBy == 'admin'
-                    ? 'Dang duoc ho tro boi ${adminName ?? 'quan tri vien'}'
-                    : 'GlamGo Bot dang ho tro',
+                    ? 'Đang được hỗ trợ bởi ${adminName ?? 'quản trị viên'}'
+                    : 'Chat Bot đang hỗ trợ',
                 style: const TextStyle(fontSize: 12),
               ),
             ],
@@ -55,7 +56,7 @@ class ChatPage extends GetView<ChatController> {
               }
               if (controller.messages.isEmpty) {
                 return const Center(
-                  child: Text('Hay gui tin nhan de duoc ho tro.'),
+                  child: Text('Hãy gửi tin nhắn để được hỗ trợ.'),
                 );
               }
               return ListView.builder(
@@ -97,16 +98,10 @@ class ChatPage extends GetView<ChatController> {
                         icon: const Icon(Icons.attach_file),
                       ),
                       Expanded(
-                        child: TextField(
+                        child: AppTextField.standard(
                           controller: controller.messageController,
-                          maxLength: 2000,
-                          minLines: 1,
-                          maxLines: 4,
-                          decoration: const InputDecoration(
-                            counterText: '',
-                            hintText: 'Nhap tin nhan...',
-                            border: OutlineInputBorder(),
-                          ),
+                          maxLines: 1,
+                          hintText: 'Nhập nội dung tin nhắn',
                           onSubmitted: (_) => controller.sendMessage(),
                         ),
                       ),
@@ -146,7 +141,7 @@ class ChatPage extends GetView<ChatController> {
           children: [
             ListTile(
               leading: const Icon(Icons.image),
-              title: const Text('Chon anh'),
+              title: const Text('Chọn ảnh'),
               onTap: () {
                 Navigator.pop(context);
                 controller.pickImage();
@@ -154,7 +149,7 @@ class ChatPage extends GetView<ChatController> {
             ),
             ListTile(
               leading: const Icon(Icons.videocam),
-              title: const Text('Chon video'),
+              title: const Text('Chọn video'),
               onTap: () {
                 Navigator.pop(context);
                 controller.pickVideo();

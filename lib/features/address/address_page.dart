@@ -32,7 +32,7 @@ class AddressPage extends GetView<AddressController> {
 
         if (controller.addresses.isEmpty) {
           return const Center(
-            child: Text('Ban chưa có địa chỉ giao hàng.'),
+            child: Text('Bạn chưa có địa chỉ giao hàng.'),
           );
         }
 

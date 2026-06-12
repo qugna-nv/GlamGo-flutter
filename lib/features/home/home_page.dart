@@ -2,16 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:project_shop/base/util/utils.dart';
-import 'package:project_shop/features/category/widget/item_categories.dart';
+import 'package:project_shop/data/response_models/article/article_model.dart';
+import 'package:project_shop/data/response_models/products/products_model.dart';
+import 'package:project_shop/features/article/widgets/item_article.dart';
 import 'package:project_shop/features/home/home_controller.dart';
+import 'package:project_shop/features/home/home_section_page.dart';
 import 'package:project_shop/features/home/widget/infinite_carousel.dart';
+import 'package:project_shop/features/notification/notification_controller.dart';
 import 'package:project_shop/features/products/widget/products_item_view.dart';
 import 'package:project_shop/gen/assets.gen.dart';
-import 'package:project_shop/widgets/themes/app_colors.dart';
 import 'package:project_shop/routes/app_routes.dart';
 import 'package:project_shop/widgets/icon_widget/icon_widget.dart';
 import 'package:project_shop/widgets/inkwell/default_ink_well.dart';
 import 'package:project_shop/widgets/shimmer/shimmer_products.dart';
+import 'package:project_shop/widgets/themes/app_colors.dart';
 
 class HomePage extends GetView<HomeController> {
   const HomePage({super.key});
@@ -24,112 +28,45 @@ class HomePage extends GetView<HomeController> {
           if (controller.isLoading.value || controller.isLoadingProduct) {
             return ShimmerProducts();
           }
+
           return Stack(
             children: [
               RefreshIndicator(
-                onRefresh: () async {
-                  await controller.onRefresh();
-                },
+                onRefresh: controller.onRefresh,
                 child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(
-                          height: 50,
-                        ),
+                        const SizedBox(height: 50),
                         SizedBox(
                           height: Get.height * 0.31,
                           child: InfiniteCarousel(),
                         ),
-                        Container(
-                          height: 50,
-                          padding: EdgeInsets.symmetric(vertical: 6),
-                          margin: EdgeInsets.symmetric(vertical: 10),
-                          child: ListView.builder(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            scrollDirection: Axis.horizontal,
-                            itemCount: controller.listCategories.length + 1,
-                            itemBuilder: (context, index) {
-                              return Obx(
-                                () {
-                                  if (index == 0) {
-                                    return ItemCategories(
-                                      selectedIndex: controller.selectedIndex,
-                                      index: index,
-                                      categoryName: "Tất cả",
-                                      onTap: () {
-                                        controller.selectCategory(index: index);
-                                      },
-                                    );
-                                  } else {
-                                    final category =
-                                        controller.listCategories[index - 1];
-                                    return ItemCategories(
-                                      selectedIndex: controller.selectedIndex,
-                                      index: index,
-                                      categoryName: category.name,
-                                      onTap: () {
-                                        controller.selectCategory(
-                                            index: index,
-                                            categoryId: category.id ?? 0);
-                                      },
-                                    );
-                                  }
-                                },
-                              );
-                            },
-                          ),
+                        const SizedBox(height: 12),
+                        _productSection(
+                          title: 'Sản phẩm nổi bật',
+                          type: HomeSectionType.featured,
+                          products: controller.featuredProducts,
                         ),
-                        Obx(() {
-                          if (controller.listDisplayedProducts.isEmpty) {
-                            return Center(child: Text('Không có sản phẩm nào'));
-                          }
-                          return GridView.builder(
-                            physics: NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            itemCount: controller.listDisplayedProducts.length,
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              childAspectRatio: 1,
-                              crossAxisSpacing: 8,
-                              mainAxisSpacing: 8,
-                              mainAxisExtent: 330,
-                            ),
-                            itemBuilder: (context, index) {
-                              final products =
-                                  controller.listDisplayedProducts[index];
-                              return GestureDetector(
-                                onTap: () {
-                                  Get.toNamed(Routes.productDetail,
-                                      arguments: products.id);
-                                },
-                                child: Obx(() {
-                                  return ProductsItemView(
-                                    name: products.name,
-                                    path: Utils.I
-                                        .getImageFullPath(products.image ?? ''),
-                                    price: Utils.I
-                                        .formatCurrency(products.price ?? 0.0),
-                                    priceSale: Utils.I.formatCurrency(
-                                        products.priceSale ?? 0.0),
-                                    onTap: () => controller.wishListController
-                                        .toggleFavorite(products),
-                                    isWishList: controller.wishListController
-                                        .isFavorite(products),
-                                  );
-                                }),
-                              );
-                            },
-                          );
-                        }),
+                        _productSection(
+                          title: 'Sản phẩm đề xuất',
+                          type: HomeSectionType.recommended,
+                          products: controller.recommendedProducts,
+                        ),
+                        _articleSection(
+                          title: 'Bài viết hot',
+                          articles: controller.hotArticles,
+                        ),
+                        const SizedBox(height: 24),
                       ],
                     ),
                   ),
                 ),
               ),
-              Positioned(top: 0, left: 0, right: 0, child: userInformation())
+              Positioned(top: 0, left: 0, right: 0, child: userInformation()),
             ],
           );
         }),
@@ -137,10 +74,161 @@ class HomePage extends GetView<HomeController> {
     );
   }
 
+  Widget _sectionHeader({
+    required String title,
+    required VoidCallback onViewAll,
+    bool showViewAll = true,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12, bottom: 10),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          if (showViewAll)
+            TextButton(
+              onPressed: onViewAll,
+              child: const Text('Xem tất cả'),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _productSection({
+    required String title,
+    required HomeSectionType type,
+    required List<ProductsModel> products,
+  }) {
+    if (products.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final displayProducts = products.take(8).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionHeader(
+          title: title,
+          showViewAll: products.length > displayProducts.length,
+          onViewAll: () {
+            Get.toNamed(
+              Routes.homeSection,
+              arguments: HomeSectionArguments(
+                title: title,
+                type: type,
+                products: products,
+              ),
+            );
+          },
+        ),
+        SizedBox(
+          height: 330,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            itemCount: displayProducts.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (context, index) {
+              final product = displayProducts[index];
+              return SizedBox(
+                width: Get.width * 0.48,
+                child: GestureDetector(
+                  onTap: () {
+                    Get.toNamed(Routes.productDetail, arguments: product.id);
+                  },
+                  child: Obx(
+                    () => ProductsItemView(
+                      name: product.name,
+                      path: Utils.I.getImageFullPath(product.image ?? ''),
+                      price: Utils.I.formatCurrency(product.price ?? 0.0),
+                      priceSale:
+                          Utils.I.formatCurrency(product.priceSale ?? 0.0),
+                      onTap: () =>
+                          controller.wishListController.toggleFavorite(product),
+                      isWishList:
+                          controller.wishListController.isFavorite(product),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _articleSection({
+    required String title,
+    required List<ArticleModel> articles,
+  }) {
+    if (articles.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final displayArticles = articles.take(3).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionHeader(
+          title: title,
+          showViewAll: articles.length > displayArticles.length,
+          onViewAll: () {
+            Get.toNamed(
+              Routes.homeSection,
+              arguments: HomeSectionArguments(
+                title: title,
+                type: HomeSectionType.hotArticles,
+                articles: articles,
+              ),
+            );
+          },
+        ),
+        ListView.separated(
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemCount: displayArticles.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 8),
+          itemBuilder: (context, index) {
+            final article = displayArticles[index];
+            return ItemArticle(
+              path: Utils.I.getImageFullPath(article.image ?? ''),
+              titleNews: article.title ?? '',
+              description: article.metaDescription ?? '',
+              radius: 12,
+              heightImg: 92,
+              widthImg: 112,
+              titleStyle: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+              descriptionStyle: const TextStyle(
+                fontSize: 13,
+                color: Colors.black54,
+              ),
+              onTap: () {
+                Get.toNamed(Routes.articleDetail, arguments: article);
+              },
+            );
+          },
+        ),
+      ],
+    );
+  }
+
   Widget userInformation() {
     return Container(
       height: 50,
-      // margin: EdgeInsets.symmetric(horizontal: 18),
       padding: EdgeInsets.only(right: 18, left: 18),
       decoration: BoxDecoration(
         color: ColorName.grey16,
@@ -218,8 +306,8 @@ class HomePage extends GetView<HomeController> {
               borderRadius: BorderRadius.circular(40.r),
             ),
             child: DefaultInkWell(
-              onTap: () {},
-              child: IconWidget.ic24(path: Assets.icons.icNotification),
+              onTap: () => Get.toNamed(Routes.notifications),
+              child: _notificationIcon(),
             ),
           ),
           SizedBox(width: 8),
@@ -227,6 +315,42 @@ class HomePage extends GetView<HomeController> {
         ],
       ),
     );
+  }
+
+  Widget _notificationIcon() {
+    final notificationController = Get.find<NotificationController>();
+
+    return Obx(() {
+      final count = notificationController.unreadCount.value;
+      return Stack(
+        clipBehavior: Clip.none,
+        children: [
+          IconWidget.ic24(path: Assets.icons.icNotification),
+          if (count > 0)
+            Positioned(
+              top: -8,
+              right: -8,
+              child: Container(
+                constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                padding: const EdgeInsets.symmetric(horizontal: 5),
+                decoration: BoxDecoration(
+                  color: ColorName.red14,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  count > 99 ? '99+' : '$count',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      );
+    });
   }
 
   Widget _cartButton() {

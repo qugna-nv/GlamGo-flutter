@@ -54,6 +54,13 @@ class RatingSection extends StatelessWidget {
                 itemBuilder: (_, index) {
                   return RatingItem(
                     item: ratings[index],
+                    canManage: controller.canManageRating(ratings[index]),
+                    onEdit: () => controller.showEditRatingDialog(
+                      ratings[index],
+                    ),
+                    onDelete: () => controller.confirmDeleteRating(
+                      ratings[index],
+                    ),
                   );
                 },
               ),

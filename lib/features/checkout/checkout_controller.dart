@@ -8,6 +8,10 @@ import 'package:project_shop/data/response_models/cart/cart_model.dart';
 import 'package:project_shop/features/address/address_page_args.dart';
 import 'package:project_shop/features/cart/cart_controller.dart';
 import 'package:project_shop/routes/app_routes.dart';
+import 'package:project_shop/utils/payment_method.dart';
+import 'package:project_shop/widgets/appbar_custom/common_snackbar.dart';
+import 'package:project_shop/widgets/common/toast_widget.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class CheckoutController extends BaseController {
   final ApiService apiService = Get.find();
@@ -18,6 +22,9 @@ class CheckoutController extends BaseController {
   final Rxn<CartModel> cart = Rxn<CartModel>();
   final RxList<AddressModel> addresses = <AddressModel>[].obs;
   final Rxn<AddressModel> selectedAddress = Rxn<AddressModel>();
+  final Rx<PaymentMethod> selectedPaymentMethod =
+      PaymentMethod.cashOnDelivery.obs;
+  final RxDouble walletBalance = 0.0.obs;
   final RxBool submitting = false.obs;
   final couponController = TextEditingController();
   final noteController = TextEditingController();
@@ -63,9 +70,15 @@ class CheckoutController extends BaseController {
       final userResponse = await apiService.getCurrentUser();
 
       cart.value = cartResponse.data;
+      walletBalance.value = userResponse.data?.walletBalance ?? 0;
       _assignAddresses(userResponse.data?.addresses ?? []);
     } catch (error) {
-      Get.snackbar('Dat hang', _getErrorMessage(error));
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Đặt hàng',
+        toastStatus: ToastStatus.fail,
+        description: _getErrorMessage(error),
+      );
     } finally {
       isLoading.value = false;
     }
@@ -80,9 +93,15 @@ class CheckoutController extends BaseController {
     );
     try {
       final userResponse = await apiService.getCurrentUser();
+      walletBalance.value = userResponse.data?.walletBalance ?? 0;
       _assignAddresses(userResponse.data?.addresses ?? []);
     } catch (error) {
-      Get.snackbar('Dia chi', _getErrorMessage(error));
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Thất bại',
+        toastStatus: ToastStatus.fail,
+        description: _getErrorMessage(error),
+      );
     }
   }
 
@@ -90,30 +109,44 @@ class CheckoutController extends BaseController {
     selectedAddress.value = address;
   }
 
+  void selectPaymentMethod(PaymentMethod method) {
+    selectedPaymentMethod.value = method;
+  }
+
   Future<void> submitOrder() async {
     final currentCart = cart.value;
     final deliveryAddress = selectedAddress.value;
 
     if (currentCart == null || checkoutItems.isEmpty) {
-      Get.snackbar('Dat hang', 'Vui long chon sản phẩm can dat.');
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Cảnh báo',
+        toastStatus: ToastStatus.success,
+        description: 'Vui lòng chọn sản phảm cần đặt',
+      );
       return;
     }
 
     if (deliveryAddress?.id == null) {
       final message = addresses.isEmpty
-          ? 'Ban chua co dia chi giao hang. Vui long them dia chi.'
-          : 'Vui long dat dia chi mac dinh truoc khi dat hang.';
-      Get.snackbar('Dat hang', message);
+          ? 'Bạn chưa có địa chỉ giao hàng. Vui lòng thêm địa chỉ.'
+          : 'Vui lòng chọn địa chỉ trước khi đặt hàng.';
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Cảnh báo',
+        toastStatus: ToastStatus.warning,
+        description: message,
+      );
       return;
     }
 
     submitting.value = true;
     try {
-      await apiService.checkout({
+      final response = await apiService.checkout({
         'address_id': deliveryAddress!.id,
         'note': noteController.text.trim(),
         'coupon_code': couponController.text.trim(),
-        'payment_method': 1,
+        'payment_method': selectedPaymentMethod.value.value,
         'item_ids': selectedItemIds,
       });
 
@@ -121,12 +154,44 @@ class CheckoutController extends BaseController {
         redirectIfUnauthenticated: false,
         showErrors: false,
       );
-      Get.snackbar('Dat hang', 'Dat hang thanh cong.');
+
+      final paymentUrl = response.data?.paymentUrl;
+      if (paymentUrl != null && paymentUrl.isNotEmpty) {
+        await _openPaymentUrl(paymentUrl);
+        return;
+      }
+
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Thành công',
+        toastStatus: ToastStatus.success,
+        description: 'Đặt hàng thành công',
+      );
       Get.offNamed(Routes.orders);
     } catch (error) {
-      Get.snackbar('Dat hang that bai', _getErrorMessage(error));
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Cảnh báo',
+        toastStatus: ToastStatus.warning,
+        description: _getErrorMessage(error),
+      );
     } finally {
       submitting.value = false;
+    }
+  }
+
+  Future<void> _openPaymentUrl(String paymentUrl) async {
+    if (Uri.tryParse(paymentUrl) == null) {
+      throw Exception('Payment URL không hợp lệ.');
+    }
+
+    final launched = await launchUrlString(
+      paymentUrl,
+      mode: LaunchMode.externalApplication,
+    );
+
+    if (!launched) {
+      throw Exception('Không thể mở cổng thanh toán.');
     }
   }
 
@@ -139,11 +204,11 @@ class CheckoutController extends BaseController {
     if (error is DioException) {
       final data = error.response?.data;
       if (data is Map<String, dynamic>) {
-        return data['message']?.toString() ?? 'Co loi xay ra.';
+        return data['message']?.toString() ?? 'Có lỗi xảy ra.';
       }
     }
 
-    return 'Co loi xay ra.';
+    return 'Có lỗi xảy ra.';
   }
 
   @override

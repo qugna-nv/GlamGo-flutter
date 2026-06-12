@@ -7,6 +7,8 @@ import 'package:project_shop/data/api_service/api_service.dart';
 import 'package:project_shop/data/response_models/cart/cart_model.dart';
 import 'package:project_shop/data/secure_storage/secure_storage.dart';
 import 'package:project_shop/routes/app_routes.dart';
+import 'package:project_shop/widgets/appbar_custom/common_snackbar.dart';
+import 'package:project_shop/widgets/common/toast_widget.dart';
 
 class CartController extends BaseController {
   final ApiService apiService = Get.find();
@@ -53,7 +55,12 @@ class CartController extends BaseController {
     }
 
     if (redirectToLogin) {
-      Get.snackbar('Dang nhap', 'Vui long dang nhap de xem giỏ hàng.');
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Cảnh báo',
+        toastStatus: ToastStatus.warning,
+        description: 'Vui lòng đăng nhập để xem giỏ hàng',
+      );
       Get.offNamed(Routes.login, arguments: {'redirect': Routes.cart});
     }
     return false;
@@ -74,7 +81,12 @@ class CartController extends BaseController {
       setCart(response.data);
     } catch (error) {
       if (showErrors) {
-        Get.snackbar('Giỏ hàng', _getErrorMessage(error));
+        Get.find<ToastWidget>().showToast(
+          Get.context!,
+          title: 'Lỗi',
+          toastStatus: ToastStatus.fail,
+          description: _getErrorMessage(error),
+        );
       }
     } finally {
       isLoading.value = false;
@@ -109,6 +121,15 @@ class CartController extends BaseController {
   Future<void> updateQuantity(CartItemModel item, int quantity) async {
     if (quantity < 1) return;
     if (!await ensureLoggedIn()) return;
+    if (item.stockQuantity != null && quantity > item.stockQuantity!) {
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Thông báo',
+        toastStatus: ToastStatus.warning,
+        description: 'Số lượng tồn kho không đủ',
+      );
+      return;
+    }
 
     _applyLocalQuantity(item.id, quantity);
     _pendingQuantities[item.id] = quantity;
@@ -131,7 +152,12 @@ class CartController extends BaseController {
 
       setCart(_mergePendingQuantities(response.data), selectAllIfEmpty: false);
     } catch (error) {
-      Get.snackbar('Giỏ hàng', _getErrorMessage(error));
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Lỗi',
+        toastStatus: ToastStatus.fail,
+        description: _getErrorMessage(error),
+      );
       await getCart();
     }
   }
@@ -145,9 +171,19 @@ class CartController extends BaseController {
     try {
       final response = await apiService.deleteCartItem(id);
       setCart(response.data, selectAllIfEmpty: false);
-      Get.snackbar('Giỏ hàng', 'Đã xoá sản phẩm khỏi giỏ hàng.');
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Thành công',
+        toastStatus: ToastStatus.success,
+        description: 'Đã xoá sản phẩm khỏi giỏ hàng.',
+      );
     } catch (error) {
-      Get.snackbar('Giỏ hàng', _getErrorMessage(error));
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Lỗi',
+        toastStatus: ToastStatus.fail,
+        description: _getErrorMessage(error),
+      );
     }
   }
 
@@ -160,7 +196,12 @@ class CartController extends BaseController {
       final response = await apiService.clearCart();
       setCart(response.data, selectAllIfEmpty: false);
     } catch (error) {
-      Get.snackbar('Giỏ hàng', _getErrorMessage(error));
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Lỗi',
+        toastStatus: ToastStatus.fail,
+        description: _getErrorMessage(error),
+      );
     }
   }
 
@@ -204,6 +245,7 @@ class CartController extends BaseController {
       return CartItemModel(
         id: item.id,
         productId: item.productId,
+        productVariantId: item.productVariantId,
         productName: item.productName,
         productCode: item.productCode,
         productImage: item.productImage,
@@ -212,6 +254,7 @@ class CartController extends BaseController {
         attributes: item.attributes,
         personaliseName: item.personaliseName,
         price: item.price,
+        stockQuantity: item.stockQuantity,
         quantity: quantity,
         totalPrice: item.price * quantity,
       );

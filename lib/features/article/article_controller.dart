@@ -6,6 +6,8 @@ import 'package:project_shop/data/response_models/article/article_model.dart';
 import 'package:project_shop/data/response_models/categories/category_model.dart';
 
 class ArticleController extends BaseController {
+  static const int _pageSize = 20;
+
   final _categoriesRepository = Get.find<CategoriesRepository>();
 
   @override
@@ -55,8 +57,11 @@ class ArticleController extends BaseController {
 
   Future<void> getArticle(int? isHot, int? categoriesArticleId) async {
     try {
-      final response =
-          await _categoriesRepository.getArticle(isHot, categoriesArticleId);
+      final response = await _categoriesRepository.getArticle(
+        isHot,
+        categoriesArticleId,
+        perPage: _pageSize,
+      );
       response.fold(
         (error) {
           appException.value = error;

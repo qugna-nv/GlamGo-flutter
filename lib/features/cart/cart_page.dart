@@ -20,12 +20,12 @@ class CartPage extends GetView<CartController> {
         appBar: AppBar(
           title: const Text('Giỏ hàng'),
           centerTitle: true,
-          actions: [
-            IconButton(
-              onPressed: controller.getCart,
-              icon: const Icon(Icons.refresh),
-            ),
-          ],
+          // actions: [
+          //   IconButton(
+          //     onPressed: controller.getCart,
+          //     icon: const Icon(Icons.refresh),
+          //   ),
+          // ],
         ),
         body: Obx(() {
           if (controller.isLoading.value) {
@@ -194,6 +194,8 @@ class _CartItem extends StatelessWidget {
     final image = item.productImage == null || item.productImage!.isEmpty
         ? ''
         : Utils.I.getImageFullPath(item.productImage!);
+    final canIncrease =
+        item.stockQuantity == null || item.quantity < item.stockQuantity!;
 
     return Container(
       padding: const EdgeInsets.all(10),
@@ -243,6 +245,13 @@ class _CartItem extends StatelessWidget {
                   Text('Ghi chu: ${item.personaliseName}',
                       style: Styles.normalText(size: 12)),
                 ],
+                if (item.stockQuantity != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    'Ton kho: ${item.stockQuantity}',
+                    style: Styles.normalText(size: 12, color: ColorName.grey1),
+                  ),
+                ],
                 const SizedBox(height: 8),
                 Row(
                   children: [
@@ -254,7 +263,10 @@ class _CartItem extends StatelessWidget {
                         style: Styles.normalTextW700(size: 14),
                       ),
                     ),
-                    _QtyButton(icon: Icons.add, onTap: onPlus),
+                    _QtyButton(
+                      icon: Icons.add,
+                      onTap: canIncrease ? onPlus : null,
+                    ),
                     const Spacer(),
                     IconButton(
                       onPressed: onRemove,
@@ -275,7 +287,7 @@ class _QtyButton extends StatelessWidget {
   const _QtyButton({required this.icon, required this.onTap});
 
   final IconData icon;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -285,10 +297,16 @@ class _QtyButton extends StatelessWidget {
         width: 30,
         height: 30,
         decoration: BoxDecoration(
-          border: Border.all(color: ColorName.grey1),
+          border: Border.all(
+            color: onTap == null ? ColorName.grey50 : ColorName.grey1,
+          ),
           borderRadius: BorderRadius.circular(6),
         ),
-        child: Icon(icon, size: 18),
+        child: Icon(
+          icon,
+          size: 18,
+          color: onTap == null ? ColorName.grey50 : null,
+        ),
       ),
     );
   }

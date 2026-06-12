@@ -5,6 +5,7 @@ import 'package:project_shop/base/app_exception.dart';
 import 'package:project_shop/base/base_controller.dart';
 import 'package:project_shop/data/repository/categories_action/categories_repository.dart';
 import 'package:project_shop/data/repository/products_action/products_repository.dart';
+import 'package:project_shop/data/response_models/article/article_model.dart';
 import 'package:project_shop/data/response_models/categories/category_model.dart';
 import 'package:project_shop/data/response_models/products/products_model.dart';
 import 'package:project_shop/data/secure_storage/share_preference_manager.dart';
@@ -13,6 +14,8 @@ import 'package:project_shop/features/wishlist/wish_list_controller.dart';
 import 'package:project_shop/utils/constant.dart';
 
 class HomeController extends BaseController {
+  static const int _pageSize = 20;
+
   final SharedPreferencesManager prefManager = Get.find();
 
   final _currentIndex = 0.obs;
@@ -59,6 +62,15 @@ class HomeController extends BaseController {
   final RxList<ProductsModel> _listAllProducts = <ProductsModel>[].obs;
   List<ProductsModel> get listAllProducts => _listAllProducts;
 
+  final RxList<ProductsModel> _featuredProducts = <ProductsModel>[].obs;
+  List<ProductsModel> get featuredProducts => _featuredProducts;
+
+  final RxList<ProductsModel> _recommendedProducts = <ProductsModel>[].obs;
+  List<ProductsModel> get recommendedProducts => _recommendedProducts;
+
+  final RxList<ArticleModel> _hotArticles = <ArticleModel>[].obs;
+  List<ArticleModel> get hotArticles => _hotArticles;
+
   final _listProducts = ProductsModel().obs;
   ProductsModel get listProducts => _listProducts.value;
 
@@ -74,8 +86,8 @@ class HomeController extends BaseController {
   @override
   void onInit() {
     getBanner();
-    getCategories();
-    getProducts();
+    getHomeProducts();
+    getHotArticles();
     cartController.getCart(
       redirectIfUnauthenticated: false,
       showErrors: false,
@@ -85,8 +97,8 @@ class HomeController extends BaseController {
 
   Future<void> onRefresh() async {
     await getBanner();
-    await getCategories();
-    await getProducts();
+    await getHomeProducts();
+    await getHotArticles();
     await cartController.getCart(
       redirectIfUnauthenticated: false,
       showErrors: false,
@@ -158,7 +170,9 @@ class HomeController extends BaseController {
   Future<void> getProducts() async {
     _isLoadingProduct.value = true;
     try {
-      final response = await _productsRepository.getProducts();
+      final response = await _productsRepository.getProducts(
+        perPage: _pageSize,
+      );
       response.fold(
         (error) {
           appException.value = error;
@@ -176,6 +190,63 @@ class HomeController extends BaseController {
     }
   }
 
+  Future<void> getHomeProducts() async {
+    _isLoadingProduct.value = true;
+    try {
+      final results = await Future.wait([
+        _productsRepository.getProducts(perPage: _pageSize),
+        _productsRepository.getFeaturedProducts(perPage: _pageSize),
+        _productsRepository.getRecommendedProducts(perPage: _pageSize),
+      ]);
+
+      results[0].fold(
+        (error) => appException.value = error,
+        (result) => _listAllProducts.assignAll(result.data ?? []),
+      );
+      results[1].fold(
+        (error) => appException.value = error,
+        (result) => _featuredProducts.assignAll(result.data ?? []),
+      );
+      results[2].fold(
+        (error) => appException.value = error,
+        (result) => _recommendedProducts.assignAll(result.data ?? []),
+      );
+
+      if (_featuredProducts.isEmpty && _listAllProducts.isNotEmpty) {
+        final hotProducts =
+            _listAllProducts.where((product) => product.features == 0).toList();
+        _featuredProducts.assignAll(
+          hotProducts.isNotEmpty
+              ? hotProducts
+              : _listAllProducts
+                  .where((product) => product.features == 1)
+                  .toList(),
+        );
+      }
+    } catch (e, stackTrace) {
+      appException.value = AppException(message: e.toString());
+      print("Error getHomeProducts: $stackTrace");
+    } finally {
+      _isLoadingProduct.value = false;
+    }
+  }
+
+  Future<void> getHotArticles() async {
+    try {
+      final response = await _categoriesRepository.getArticle(
+        1,
+        null,
+        perPage: _pageSize,
+      );
+      response.fold(
+        (error) => appException.value = error,
+        (result) => _hotArticles.assignAll(result.data ?? []),
+      );
+    } catch (e) {
+      appException.value = AppException(message: e.toString());
+    }
+  }
+
   Future<void> getProductsByCategory(int? categoryId) async {
     if (categoryId != null &&
         _productsCacheByCategory.containsKey(categoryId) &&
@@ -187,8 +258,10 @@ class HomeController extends BaseController {
 
     _isLoadingProductByCa.value = true;
     try {
-      final response =
-          await _productsRepository.getProductsByCategory(categoryId);
+      final response = await _productsRepository.getProductsByCategory(
+        categoryId,
+        perPage: _pageSize,
+      );
       response.fold(
         (error) {
           appException.value = error;

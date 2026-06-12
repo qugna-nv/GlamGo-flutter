@@ -9,6 +9,8 @@ import 'package:project_shop/data/secure_storage/secure_storage.dart';
 import 'package:project_shop/data/secure_storage/share_preference_manager.dart';
 import 'package:project_shop/routes/app_routes.dart';
 import 'package:project_shop/utils/constant.dart';
+import 'package:project_shop/widgets/appbar_custom/common_snackbar.dart';
+import 'package:project_shop/widgets/common/toast_widget.dart';
 
 class WishListController extends BaseController {
   final ApiService apiService = Get.find();
@@ -32,7 +34,12 @@ class WishListController extends BaseController {
       _favoriteProducts.assignAll(response.data ?? []);
       await _cacheFavorites();
     } catch (error) {
-      Get.snackbar('Yeu thich', _getErrorMessage(error));
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Thất bại',
+        toastStatus: ToastStatus.fail,
+        description: _getErrorMessage(error),
+      );
       _loadLocalFavoriteProducts();
     } finally {
       isLoading.value = false;
@@ -57,10 +64,19 @@ class WishListController extends BaseController {
         _favoriteProducts.add(serverProduct);
       }
       await _cacheFavorites();
-      Get.snackbar('Thanh cong', 'Da them vao yeu thich');
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        toastStatus: ToastStatus.success,
+        title: 'Thành công',
+        description: 'Thêm sản phẩm yêu thích thành công',
+      );
     } catch (error) {
       _favoriteProducts.removeWhere((item) => item.id == productId);
-      Get.snackbar('Yeu thich', _getErrorMessage(error));
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        toastStatus: ToastStatus.fail,
+        description: _getErrorMessage(error),
+      );
     }
   }
 
@@ -76,10 +92,18 @@ class WishListController extends BaseController {
     try {
       await apiService.removeFavoriteProduct(productId);
       await _cacheFavorites();
-      Get.snackbar('Da xoa', 'Da xoa san pham khoi yeu thich');
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        toastStatus: ToastStatus.success,
+        description: 'Đã xoá sản phẩm yêu thích',
+      );
     } catch (error) {
       _favoriteProducts.assignAll(oldProducts);
-      Get.snackbar('Yeu thich', _getErrorMessage(error));
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        toastStatus: ToastStatus.fail,
+        description: _getErrorMessage(error),
+      );
     }
   }
 

@@ -22,7 +22,11 @@ abstract class ICategoriesRepository {
   //     int? productId);
 
   Future<Either<AppException, BaseResponse<List<ArticleModel>>>> getArticle(
-      int? isHote, int? categoryArticleId);
+    int? isHote,
+    int? categoryArticleId, {
+    int? page,
+    int? perPage,
+  });
 
   Future<Either<AppException, BaseResponse<List<CategoryModel>>>>
       getCategoriesArticle();
@@ -89,9 +93,14 @@ class CategoriesRepository implements ICategoriesRepository {
 
   @override
   Future<Either<AppException, BaseResponse<List<ArticleModel>>>> getArticle(
-      int? isHot, int? categoryArticleId) async {
+    int? isHot,
+    int? categoryArticleId, {
+    int? page,
+    int? perPage,
+  }) async {
     try {
-      final response = await _apiService.getArticle(isHot, categoryArticleId);
+      final response =
+          await _apiService.getArticle(isHot, categoryArticleId, page, perPage);
       if (response.errorCode != 200) {
         return Left(AppException(message: response.message.toString()));
       }

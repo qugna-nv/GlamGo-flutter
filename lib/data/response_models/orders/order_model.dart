@@ -20,6 +20,15 @@ int? stringToIntNullable(dynamic value) {
   return int.tryParse(value.toString());
 }
 
+bool dynamicToBool(dynamic value) {
+  if (value is bool) return value;
+  if (value is num) return value != 0;
+  if (value is String) {
+    return value == '1' || value.toLowerCase() == 'true';
+  }
+  return false;
+}
+
 @JsonSerializable()
 class OrderPaginationModel {
   @JsonKey(name: 'current_page', fromJson: stringToInt)
@@ -129,6 +138,9 @@ class OrderDetailModel {
   @JsonKey(name: 'created_at')
   final String? createdAt;
 
+  @JsonKey(name: 'payment_url')
+  final String? paymentUrl;
+
   OrderDetailModel({
     required this.id,
     this.code,
@@ -142,6 +154,7 @@ class OrderDetailModel {
     this.customer,
     required this.items,
     this.createdAt,
+    this.paymentUrl,
   });
 
   factory OrderDetailModel.fromJson(Map<String, dynamic> json) =>
@@ -198,6 +211,9 @@ class OrderItemModel {
   @JsonKey(name: 'product_id', fromJson: stringToInt)
   final int productId;
 
+  @JsonKey(name: 'product_variant_id', fromJson: stringToIntNullable)
+  final int? productVariantId;
+
   @JsonKey(name: 'product_name')
   final String? productName;
 
@@ -228,9 +244,16 @@ class OrderItemModel {
   @JsonKey(name: 'personalise_name')
   final String? personaliseName;
 
+  @JsonKey(name: 'has_reviewed', fromJson: dynamicToBool)
+  final bool hasReviewed;
+
+  @JsonKey(name: 'can_review', fromJson: dynamicToBool)
+  final bool canReview;
+
   OrderItemModel({
     required this.id,
     required this.productId,
+    this.productVariantId,
     this.productName,
     this.productCode,
     this.productImage,
@@ -241,6 +264,8 @@ class OrderItemModel {
     this.attributeName,
     required this.attributes,
     this.personaliseName,
+    this.hasReviewed = false,
+    this.canReview = false,
   });
 
   factory OrderItemModel.fromJson(Map<String, dynamic> json) =>

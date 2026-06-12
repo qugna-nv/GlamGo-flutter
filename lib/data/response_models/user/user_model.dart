@@ -3,6 +3,12 @@ import 'package:project_shop/data/response_models/address/address_model.dart';
 
 part 'user_model.g.dart';
 
+double stringToDouble(dynamic value) {
+  if (value == null) return 0.0;
+  if (value is num) return value.toDouble();
+  return double.tryParse(value.toString()) ?? 0.0;
+}
+
 @JsonSerializable()
 class UserModel {
   @JsonKey(name: "id")
@@ -25,6 +31,8 @@ class UserModel {
   final int? contryId;
   @JsonKey(name: "status_id")
   final int? statusId;
+  @JsonKey(name: "wallet_balance", fromJson: stringToDouble)
+  final double? walletBalance;
   @JsonKey(name: "google_id")
   final String? googleId;
   @JsonKey(name: "created_at")
@@ -49,6 +57,7 @@ class UserModel {
     this.address,
     this.contryId,
     this.statusId,
+    this.walletBalance,
     this.googleId,
     this.createdAt,
     this.updatedAt,

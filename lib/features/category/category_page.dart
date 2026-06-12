@@ -4,6 +4,8 @@ import 'package:project_shop/base/util/utils.dart';
 import 'package:project_shop/features/category/category_controller.dart';
 import 'package:project_shop/features/category/widget/item_categories.dart';
 import 'package:project_shop/features/products/widget/products_item_view.dart';
+import 'package:project_shop/routes/app_routes.dart';
+import 'package:project_shop/utils/app_text_field.dart';
 
 class CategoryPage extends GetView<CategoryController> {
   const CategoryPage({super.key});
@@ -62,6 +64,19 @@ class CategoryPage extends GetView<CategoryController> {
                       },
                     ),
                   ),
+                  AppTextField.standard(
+                    controller: controller.searchController,
+                    onChanged: controller.onSearchChanged,
+                    hintText: 'Tìm kiếm theo mã hoặc tên sản phẩm',
+                    prefixIcon: Icons.search,
+                    suffixIcon: controller.searchQuery.isEmpty
+                        ? null
+                        : IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: controller.clearSearch,
+                          ),
+                  ),
+                  const SizedBox(height: 12),
                   Obx(
                     () {
                       if (controller.listDisplayedProducts.isEmpty) {
@@ -74,8 +89,10 @@ class CategoryPage extends GetView<CategoryController> {
                               await controller.onRefresh();
                             },
                             child: GridView.builder(
+                              controller: controller.scrollController,
                               itemCount:
-                                  controller.listDisplayedProducts.length,
+                                  controller.listDisplayedProducts.length +
+                                      (controller.isLoadingMore ? 1 : 0),
                               gridDelegate:
                                   SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 2,
@@ -85,23 +102,36 @@ class CategoryPage extends GetView<CategoryController> {
                                 mainAxisExtent: 330,
                               ),
                               itemBuilder: (context, index) {
+                                if (index >=
+                                    controller.listDisplayedProducts.length) {
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                }
+
                                 final products =
                                     controller.listDisplayedProducts[index];
-                                return Obx(() {
-                                  return ProductsItemView(
-                                    name: products.name,
-                                    path: Utils.I
-                                        .getImageFullPath(products.image ?? ''),
-                                    price: Utils.I
-                                        .formatCurrency(products.price ?? 0.0),
-                                    priceSale: Utils.I.formatCurrency(
-                                        products.priceSale ?? 0.0),
-                                    onTap: () => controller.wishListController
-                                        .toggleFavorite(products),
-                                    isWishList: controller.wishListController
-                                        .isFavorite(products),
-                                  );
-                                });
+                                return GestureDetector(
+                                  onTap: () {
+                                    Get.toNamed(Routes.productDetail,
+                                        arguments: products.id);
+                                  },
+                                  child: Obx(() {
+                                    return ProductsItemView(
+                                      name: products.name,
+                                      path: Utils.I.getImageFullPath(
+                                          products.image ?? ''),
+                                      price: Utils.I.formatCurrency(
+                                          products.price ?? 0.0),
+                                      priceSale: Utils.I.formatCurrency(
+                                          products.priceSale ?? 0.0),
+                                      onTap: () => controller.wishListController
+                                          .toggleFavorite(products),
+                                      isWishList: controller.wishListController
+                                          .isFavorite(products),
+                                    );
+                                  }),
+                                );
                               },
                             ),
                           ),

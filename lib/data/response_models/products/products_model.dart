@@ -72,6 +72,9 @@ class ProductsModel {
   @JsonKey(name: 'sameCategory')
   final List<SameCategoryModel>? sameCategory;
 
+  @JsonKey(defaultValue: [])
+  final List<ProductVariantModel> variants;
+
   ProductsModel({
     this.id,
     this.categoryId,
@@ -96,12 +99,79 @@ class ProductsModel {
     this.productImages,
     this.attribute,
     this.sameCategory,
+    this.variants = const [],
   });
 
   factory ProductsModel.fromJson(Map<String, dynamic> json) =>
       _$ProductsModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$ProductsModelToJson(this);
+}
+
+@JsonSerializable()
+class ProductVariantModel {
+  final int? id;
+
+  @JsonKey(name: 'product_id')
+  final int? productId;
+
+  final String? sku;
+
+  @JsonKey(fromJson: stringToDouble)
+  final double? price;
+
+  final int? quantity;
+
+  final int? status;
+
+  @JsonKey(name: 'attribute_ids', defaultValue: [])
+  final List<int> attributeIds;
+
+  @JsonKey(defaultValue: [])
+  final List<ProductVariantAttributeModel> attributes;
+
+  ProductVariantModel({
+    this.id,
+    this.productId,
+    this.sku,
+    this.price,
+    this.quantity,
+    this.status,
+    this.attributeIds = const [],
+    this.attributes = const [],
+  });
+
+  factory ProductVariantModel.fromJson(Map<String, dynamic> json) =>
+      _$ProductVariantModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ProductVariantModelToJson(this);
+}
+
+@JsonSerializable()
+class ProductVariantAttributeModel {
+  @JsonKey(name: 'attribute_id')
+  final int? attributeId;
+
+  @JsonKey(name: 'attribute_name')
+  final String? attributeName;
+
+  @JsonKey(name: 'attribute_value_id')
+  final int? attributeValueId;
+
+  @JsonKey(name: 'attribute_value')
+  final String? attributeValue;
+
+  ProductVariantAttributeModel({
+    this.attributeId,
+    this.attributeName,
+    this.attributeValueId,
+    this.attributeValue,
+  });
+
+  factory ProductVariantAttributeModel.fromJson(Map<String, dynamic> json) =>
+      _$ProductVariantAttributeModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ProductVariantAttributeModelToJson(this);
 }
 
 @JsonSerializable()

@@ -74,6 +74,7 @@ OrderDetailModel _$OrderDetailModelFromJson(Map<String, dynamic> json) =>
               .toList() ??
           [],
       createdAt: json['created_at'] as String?,
+      paymentUrl: json['payment_url'] as String?,
     );
 
 Map<String, dynamic> _$OrderDetailModelToJson(OrderDetailModel instance) =>
@@ -90,6 +91,7 @@ Map<String, dynamic> _$OrderDetailModelToJson(OrderDetailModel instance) =>
       'customer': instance.customer,
       'items': instance.items,
       'created_at': instance.createdAt,
+      'payment_url': instance.paymentUrl,
     };
 
 OrderCustomerModel _$OrderCustomerModelFromJson(Map<String, dynamic> json) =>
@@ -120,6 +122,7 @@ OrderItemModel _$OrderItemModelFromJson(Map<String, dynamic> json) =>
     OrderItemModel(
       id: stringToInt(json['id']),
       productId: stringToInt(json['product_id']),
+      productVariantId: stringToIntNullable(json['product_variant_id']),
       productName: json['product_name'] as String?,
       productCode: json['product_code'] as String?,
       productImage: json['product_image'] as String?,
@@ -134,12 +137,19 @@ OrderItemModel _$OrderItemModelFromJson(Map<String, dynamic> json) =>
               .toList() ??
           [],
       personaliseName: json['personalise_name'] as String?,
+      hasReviewed: json['has_reviewed'] == null
+          ? false
+          : dynamicToBool(json['has_reviewed']),
+      canReview: json['can_review'] == null
+          ? false
+          : dynamicToBool(json['can_review']),
     );
 
 Map<String, dynamic> _$OrderItemModelToJson(OrderItemModel instance) =>
     <String, dynamic>{
       'id': instance.id,
       'product_id': instance.productId,
+      'product_variant_id': instance.productVariantId,
       'product_name': instance.productName,
       'product_code': instance.productCode,
       'product_image': instance.productImage,
@@ -150,6 +160,8 @@ Map<String, dynamic> _$OrderItemModelToJson(OrderItemModel instance) =>
       'attribute_name': instance.attributeName,
       'attributes': instance.attributes,
       'personalise_name': instance.personaliseName,
+      'has_reviewed': instance.hasReviewed,
+      'can_review': instance.canReview,
     };
 
 OrderAttributeModel _$OrderAttributeModelFromJson(Map<String, dynamic> json) =>

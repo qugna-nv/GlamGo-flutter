@@ -7,9 +7,15 @@ class RatingItem extends StatelessWidget {
   const RatingItem({
     super.key,
     required this.item,
+    this.canManage = false,
+    this.onEdit,
+    this.onDelete,
   });
 
   final ProductRatingModel item;
+  final bool canManage;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +29,9 @@ class RatingItem extends StatelessWidget {
           _RatingUserInfo(
             name: item.fullname ?? 'Khách hàng',
             dateText: dateText,
+            canManage: canManage,
+            onEdit: onEdit,
+            onDelete: onDelete,
           ),
           const SizedBox(height: 4),
           _RatingStars(
@@ -58,10 +67,16 @@ class _RatingUserInfo extends StatelessWidget {
   const _RatingUserInfo({
     required this.name,
     required this.dateText,
+    required this.canManage,
+    this.onEdit,
+    this.onDelete,
   });
 
   final String name;
   final String dateText;
+  final bool canManage;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -80,6 +95,31 @@ class _RatingUserInfo extends StatelessWidget {
             color: ColorName.grey45,
           ),
         ),
+        if (canManage) ...[
+          const SizedBox(width: 4),
+          PopupMenuButton<String>(
+            padding: EdgeInsets.zero,
+            icon: Icon(Icons.more_vert, size: 20, color: ColorName.grey45),
+            onSelected: (value) {
+              if (value == 'edit') {
+                onEdit?.call();
+              }
+              if (value == 'delete') {
+                onDelete?.call();
+              }
+            },
+            itemBuilder: (_) => const [
+              PopupMenuItem(
+                value: 'edit',
+                child: Text('Sua'),
+              ),
+              PopupMenuItem(
+                value: 'delete',
+                child: Text('Xoa'),
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }

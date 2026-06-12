@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:project_shop/configs/app_configs.dart';
 import 'package:project_shop/data/base/base_response.dart';
@@ -7,6 +9,7 @@ import 'package:project_shop/data/response_models/address/address_model.dart';
 import 'package:project_shop/data/response_models/cart/cart_model.dart';
 import 'package:project_shop/data/response_models/chat/chat_model.dart';
 import 'package:project_shop/data/response_models/categories/category_model.dart';
+import 'package:project_shop/data/response_models/notification/notification_model.dart';
 import 'package:project_shop/data/response_models/orders/order_model.dart';
 import 'package:project_shop/data/response_models/products/product_rating_model.dart';
 import 'package:project_shop/data/response_models/products/products_model.dart';
@@ -23,11 +26,28 @@ abstract class ApiService {
   Future<BaseResponse<List<CategoryModel>>> getCategories();
 
   @GET(ProductsAction.getProducts)
-  Future<BaseResponse<List<ProductsModel>>> getProducts();
+  Future<BaseResponse<List<ProductsModel>>> getProducts(
+    @Query("page") int? page,
+    @Query("per_page") int? perPage,
+  );
+
+  @GET(ProductsAction.getFeaturedProducts)
+  Future<BaseResponse<List<ProductsModel>>> getFeaturedProducts(
+    @Query("page") int? page,
+    @Query("per_page") int? perPage,
+  );
+
+  @GET(ProductsAction.getRecommendedProducts)
+  Future<BaseResponse<List<ProductsModel>>> getRecommendedProducts(
+    @Query("page") int? page,
+    @Query("per_page") int? perPage,
+  );
 
   @GET(ProductsAction.getProductsByCategory)
   Future<BaseResponse<List<ProductsModel>>> getProductsByCategory(
     @Query("category_id") int? categoryId,
+    @Query("page") int? page,
+    @Query("per_page") int? perPage,
   );
 
   @GET(ProductsAction.getProductDetail)
@@ -58,10 +78,25 @@ abstract class ApiService {
     @Body() Map<String, dynamic> body,
   );
 
+  @PUT('/products/{id}/ratings/{ratingId}')
+  Future<BaseResponse<ProductRatingModel>> updateProductRating(
+    @Path('id') int id,
+    @Path('ratingId') int ratingId,
+    @Body() Map<String, dynamic> body,
+  );
+
+  @DELETE('/products/{id}/ratings/{ratingId}')
+  Future<BaseResponse<dynamic>> deleteProductRating(
+    @Path('id') int id,
+    @Path('ratingId') int ratingId,
+  );
+
   @GET(ArticleAction.getArticle)
   Future<BaseResponse<List<ArticleModel>>> getArticle(
     @Query("is_hot") int? isHot,
     @Query("category_artical_id") int? categoryArticleId,
+    @Query("page") int? page,
+    @Query("per_page") int? perPage,
   );
 
   @GET(ArticleAction.getCategoriesArticle)
@@ -79,6 +114,24 @@ abstract class ApiService {
 
   @GET(AuthAction.me)
   Future<BaseResponse<UserModel>> getCurrentUser();
+
+  @MultiPart()
+  @POST('/auth/profile')
+  Future<BaseResponse<UserModel>> updateProfile(
+    @Part(name: 'name') String? name,
+    @Part(name: 'phone') String? phone,
+    @Part(name: 'avatar') File? avatar,
+  );
+
+  @POST('/auth/wallet/top-up')
+  Future<BaseResponse<dynamic>> topUpWallet(
+    @Body() Map<String, dynamic> body,
+  );
+
+  @POST('/auth/push-subscription')
+  Future<BaseResponse<dynamic>> syncPushSubscription(
+    @Body() Map<String, dynamic> body,
+  );
 
   @GET(AddressAction.addresses)
   Future<BaseResponse<List<AddressModel>>> getAddresses();
@@ -140,10 +193,22 @@ abstract class ApiService {
   @POST(ChatAction.messages)
   Future<BaseResponse<ChatMessageModel>> sendChatMessage(
     @Part(name: 'message') String? message,
-    @Part(name: 'file') MultipartFile? file,
+    @Part(name: 'file') File? file,
   );
 
   @POST(ChatAction.broadcastingAuth)
-  Future<Map<String, dynamic>> authorizeChatChannel(
-      @Body() Map<String, dynamic> body);
+  Future<dynamic> authorizeChatChannel(@Body() Map<String, dynamic> body);
+
+  @GET(NotificationAction.notifications)
+  Future<NotificationListResponse> getNotifications(
+    @Query('per_page') int? perPage,
+  );
+
+  @POST('/notifications/{id}/read')
+  Future<NotificationReadResponse> markNotificationAsRead(
+    @Path('id') String id,
+  );
+
+  @POST(NotificationAction.markAllAsRead)
+  Future<NotificationMarkAllResponse> markAllNotificationsAsRead();
 }

@@ -8,6 +8,8 @@ import 'package:project_shop/data/api_service/api_service.dart';
 import 'package:project_shop/data/response_models/address/address_model.dart';
 import 'package:project_shop/data/response_models/address/location_model.dart';
 import 'package:project_shop/features/account/account_controller.dart';
+import 'package:project_shop/widgets/appbar_custom/common_snackbar.dart';
+import 'package:project_shop/widgets/common/toast_widget.dart';
 
 class AddressController extends BaseController {
   final ApiService apiService = Get.find();
@@ -27,7 +29,12 @@ class AddressController extends BaseController {
     try {
       await Future.wait([loadLocations(), loadAddresses()]);
     } catch (error) {
-      Get.snackbar('Dia chi', _getErrorMessage(error));
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Thất bại',
+        toastStatus: ToastStatus.fail,
+        description: _getErrorMessage(error),
+      );
     } finally {
       isLoading.value = false;
     }
@@ -65,7 +72,12 @@ class AddressController extends BaseController {
       await _refreshAfterMutation();
       return true;
     } catch (error) {
-      Get.snackbar('Dia chi', _getErrorMessage(error));
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Thất bại',
+        toastStatus: ToastStatus.fail,
+        description: _getErrorMessage(error),
+      );
       return false;
     } finally {
       isSaving.value = false;
@@ -81,7 +93,12 @@ class AddressController extends BaseController {
       await _refreshAfterMutation();
       return true;
     } catch (error) {
-      Get.snackbar('Dia chi', _getErrorMessage(error));
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Thất bại',
+        toastStatus: ToastStatus.fail,
+        description: _getErrorMessage(error),
+      );
       return false;
     }
   }
@@ -89,7 +106,12 @@ class AddressController extends BaseController {
   Future<void> deleteAddress(AddressModel address) async {
     if (address.id == null) return;
     if (address.isDefault) {
-      Get.snackbar('Dia chi', 'Khong the xoa dia chi mac dinh.');
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Cảnh báo',
+        toastStatus: ToastStatus.warning,
+        description: 'Không thể xoá địa chỉ mặc định',
+      );
       return;
     }
 
@@ -97,7 +119,12 @@ class AddressController extends BaseController {
       await apiService.deleteAddress(address.id!);
       await _refreshAfterMutation();
     } catch (error) {
-      Get.snackbar('Dia chi', _getErrorMessage(error));
+      Get.find<ToastWidget>().showToast(
+        Get.context!,
+        title: 'Thất bại',
+        toastStatus: ToastStatus.fail,
+        description: _getErrorMessage(error),
+      );
     }
   }
 

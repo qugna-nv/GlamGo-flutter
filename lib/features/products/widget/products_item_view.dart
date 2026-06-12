@@ -196,7 +196,6 @@ class ProductsItemView extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                // const SizedBox(height: 8),
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Row(
@@ -223,14 +222,14 @@ class ProductsItemView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      price ?? '1.200.000 đ',
+                      priceSale ?? '1.200.000 đ',
                       style: Styles.normalTextW400(size: 14, color: Colors.grey)
                           .copyWith(
                         decoration: TextDecoration.lineThrough,
                       ),
                     ),
                     Text(
-                      priceSale ?? '900.000 đ',
+                      price ?? '900.000 đ',
                       style: Styles.normalTextW700(
                           size: 18, color: const Color(0xFF631919)),
                     ),

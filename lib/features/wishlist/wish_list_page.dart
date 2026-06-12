@@ -14,7 +14,7 @@ class WishListPage extends GetView<WishListController> {
     return SafeArea(
       child: Scaffold(
         appBar: CustomAppBar(
-          label: 'San pham yeu thich',
+          label: 'Sản phẩm yêu thích',
           showBackButton: false,
         ),
         body: Obx(() {

@@ -1,12 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:project_shop/bindings/initial_app.dart';
 import 'package:project_shop/bindings/initial_binding.dart';
 import 'package:project_shop/core/notification_service.dart';
+import 'package:project_shop/core/payment_deep_link_service.dart';
 import 'package:project_shop/data/secure_storage/share_preference_manager.dart';
 import 'package:project_shop/firebase_options.dart';
 import 'package:project_shop/routes/app_pages.dart';
@@ -15,6 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: '.env');
 
   final prefs = await SharedPreferences.getInstance();
   Get.put(SharedPreferencesManager(sharedPreferences: prefs));
@@ -40,6 +42,9 @@ Future<void> _initBackgroundServices() async {
 
     await Get.putAsync<NotificationService>(
       () => NotificationService().init(),
+    );
+    await Get.putAsync<PaymentDeepLinkService>(
+      () => PaymentDeepLinkService().init(),
     );
   } catch (e, stackTrace) {
     debugPrint('Init background services failed: $e');

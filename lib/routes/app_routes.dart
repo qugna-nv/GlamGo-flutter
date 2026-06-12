@@ -3,6 +3,7 @@ abstract class Routes {
   static const login = '/login';
   static const onboarding = '/onboarding';
   static const home = '/home';
+  static const homeSection = '/home-section';
   static const initPage = '/navigation';
   static const wishlist = '/wishlist';
   static const cart = '/cart';
@@ -16,4 +17,6 @@ abstract class Routes {
   static const article = '/article';
   static const articleDetail = '/article-detail';
   static const chat = '/chat';
+  static const notifications = '/notifications';
+  static const accountDetails = '/account-details';
 }

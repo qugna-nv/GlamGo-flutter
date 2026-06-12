@@ -17,6 +17,7 @@ class ChatRealtimeService {
     required String privateChannel,
     required void Function(ChatMessageModel message) onMessage,
     required void Function() onDisconnected,
+    required void Function(Object error) onError,
   }) async {
     await disconnect();
 
@@ -34,10 +35,13 @@ class ChatRealtimeService {
           final socketId = data['socket_id']?.toString();
           if (socketId == null) return;
 
-          final auth = await apiService.authorizeChatChannel({
+          final authResponse = await apiService.authorizeChatChannel({
             'socket_id': socketId,
             'channel_name': privateChannel,
           });
+          final auth = authResponse is Map<String, dynamic>
+              ? authResponse
+              : <String, dynamic>{};
           channel.sink.add(jsonEncode({
             'event': 'pusher:subscribe',
             'data': {
@@ -62,7 +66,10 @@ class ChatRealtimeService {
         }
       },
       onDone: onDisconnected,
-      onError: (_) => onDisconnected(),
+      onError: (error) {
+        onError(error);
+        onDisconnected();
+      },
     );
   }
 

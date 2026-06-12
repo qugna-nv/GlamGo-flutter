@@ -1,5 +1,8 @@
 import 'package:get/get.dart';
 import 'package:project_shop/data/response_models/address/address_model.dart';
+import 'package:project_shop/features/account/account_controller.dart';
+import 'package:project_shop/features/account/account_detail_controller.dart';
+import 'package:project_shop/features/account/account_detail_page.dart';
 import 'package:project_shop/features/address/widgets/address_form_page.dart';
 import 'package:project_shop/features/article/article_binding.dart';
 import 'package:project_shop/features/article/article_detail/article_detail_page.dart';
@@ -16,10 +19,13 @@ import 'package:project_shop/features/category/category_binding.dart';
 import 'package:project_shop/features/category/category_page.dart';
 import 'package:project_shop/features/home/home_binding.dart';
 import 'package:project_shop/features/home/home_page.dart';
+import 'package:project_shop/features/home/home_section_page.dart';
 import 'package:project_shop/features/login/login_binding.dart';
 import 'package:project_shop/features/login/login_page.dart';
 import 'package:project_shop/features/navigation/main_screen_binding.dart';
 import 'package:project_shop/features/navigation/main_screen.dart';
+import 'package:project_shop/features/notification/notification_binding.dart';
+import 'package:project_shop/features/notification/notification_page.dart';
 import 'package:project_shop/features/onboarding/onboarding_binding.dart';
 import 'package:project_shop/features/onboarding/onboarding_page.dart';
 import 'package:project_shop/features/order/order_binding.dart';
@@ -68,6 +74,10 @@ class AppPages {
       // transitionDuration: Duration(seconds: 1),
     ),
     GetPage(
+      name: Routes.homeSection,
+      page: () => const HomeSectionPage(),
+    ),
+    GetPage(
       name: Routes.wishlist,
       binding: WishListBinding(),
       page: () => WishListPage(),
@@ -106,6 +116,21 @@ class AppPages {
       name: Routes.chat,
       binding: ChatBinding(),
       page: () => const ChatPage(),
+    ),
+    GetPage(
+      name: Routes.notifications,
+      binding: NotificationBinding(),
+      page: () => const NotificationPage(),
+    ),
+    GetPage(
+      name: Routes.accountDetails,
+      binding: BindingsBuilder(() {
+        if (!Get.isRegistered<AccountController>()) {
+          Get.lazyPut(() => AccountController());
+        }
+        Get.lazyPut(() => AccountDetailController());
+      }),
+      page: () => const AccountDetailPage(),
     ),
     GetPage(
       name: Routes.categories,

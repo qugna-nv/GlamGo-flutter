@@ -75,6 +75,7 @@ class ProductReviewPage extends GetView<ProductReviewController> {
                       () => IButton(
                         title: 'Gửi đánh giá',
                         color: ColorName.black,
+                        isDisable: !item.canReview,
                         isLoading: controller.submitting.value,
                         textStyle:
                             Styles.normalTextW600(color: ColorName.white),

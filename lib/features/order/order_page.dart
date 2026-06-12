@@ -20,12 +20,6 @@ class OrderPage extends GetView<OrderController> {
           appBar: AppBar(
             title: const Text('Đơn hàng'),
             centerTitle: true,
-            actions: [
-              IconButton(
-                onPressed: controller.getOrders,
-                icon: const Icon(Icons.refresh),
-              ),
-            ],
             bottom: TabBar(
               isScrollable: true,
               tabAlignment: TabAlignment.start,
@@ -44,8 +38,8 @@ class OrderPage extends GetView<OrderController> {
               return Center(
                 child: Text(
                   controller.selectedTab.status == null
-                      ? 'Chua co don hang'
-                      : 'Chua co don hang ${controller.selectedTab.label.toLowerCase()}',
+                      ? 'Chưa có đơn hàng'
+                      : 'Chưa có đơn hàng ${controller.selectedTab.label.toLowerCase()}',
                 ),
               );
             }
@@ -94,7 +88,7 @@ class OrderPage extends GetView<OrderController> {
 
                 final order = controller.selectedOrder.value;
                 if (order == null) {
-                  return const Center(child: Text('Khong co du lieu'));
+                  return const Center(child: Text('Không có dữ liệu'));
                 }
 
                 return ListView(
@@ -106,7 +100,7 @@ class OrderPage extends GetView<OrderController> {
                       children: [
                         Expanded(
                           child: Text(
-                            order.code ?? 'Don hang',
+                            order.code ?? 'Đơn hàng',
                             style: Styles.normalTextW800(size: 18),
                           ),
                         ),
@@ -133,41 +127,43 @@ class OrderPage extends GetView<OrderController> {
                         item: item,
                         orderStatus: order.status,
                         onReview: () async {
-                          Navigator.of(context).pop();
-                          await Get.toNamed(
+                          final reviewed = await Get.toNamed(
                             Routes.productReview,
                             arguments: item,
                           );
+                          if (reviewed == true) {
+                            await controller.getOrderDetail(order.id);
+                          }
                         },
                         onBuyAgain: () => controller.buyAgain(item),
                       ),
                     ),
                     const Divider(height: 24),
                     _InfoRow(
-                      'Tam tinh',
+                      'Tạm tính',
                       Utils.I.formatCurrency(order.subtotal),
                     ),
                     _InfoRow(
-                      'Giam gia',
+                      'Giảm giá',
                       Utils.I.formatCurrency(order.discount),
                     ),
                     _InfoRow(
-                      'Thanh toan',
+                      'Thanh toán',
                       Utils.I.formatCurrency(order.totalPrice),
                       isBold: true,
                     ),
                     const SizedBox(height: 16),
-                    Text('Giao hang', style: Styles.normalTextW700(size: 16)),
+                    Text('Giao hàng', style: Styles.normalTextW700(size: 16)),
                     const SizedBox(height: 8),
                     Text(order.customer?.address ?? ''),
                     Text(order.customer?.phoneNumber ?? ''),
                     if ((order.customer?.note ?? '').isNotEmpty)
-                      Text('Ghi chu: ${order.customer?.note}'),
+                      Text('Ghi chú: ${order.customer?.note}'),
                     if ([1, 2].contains(order.status)) ...[
                       const SizedBox(height: 16),
                       OutlinedButton(
                         onPressed: () => controller.cancelOrder(order.id),
-                        child: const Text('Huy don hang'),
+                        child: const Text('Huỷ đơn hàng'),
                       ),
                     ],
                   ],
@@ -211,7 +207,7 @@ class _OrderCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    order.code ?? 'Don hang',
+                    order.code ?? 'Đơn hàng',
                     style: Styles.normalTextW700(size: 15),
                   ),
                 ),
@@ -291,7 +287,7 @@ class _OrderItem extends StatelessWidget {
                       Text(
                         item.attributes
                             .map((attribute) =>
-                                '${attribute.attributeName ?? 'Phan loai'}: ${attribute.attributeValue ?? ''}')
+                                '${attribute.attributeName ?? 'Phân loại'}: ${attribute.attributeValue ?? ''}')
                             .join(', '),
                         style:
                             Styles.normalText(size: 12, color: ColorName.grey1),
@@ -310,17 +306,25 @@ class _OrderItem extends StatelessWidget {
             const SizedBox(height: 8),
             Row(
               children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: onReview,
-                    child: const Text('Danh gia'),
+                if (item.hasReviewed)
+                  const Expanded(
+                    child: OutlinedButton(
+                      onPressed: null,
+                      child: Text('Đã đánh giá'),
+                    ),
                   ),
-                ),
+                if (!item.hasReviewed)
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: item.canReview ? onReview : null,
+                      child: const Text('Đánh giá'),
+                    ),
+                  ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: onBuyAgain,
-                    child: const Text('Mua lai'),
+                    child: const Text('Mua lại'),
                   ),
                 ),
               ],
