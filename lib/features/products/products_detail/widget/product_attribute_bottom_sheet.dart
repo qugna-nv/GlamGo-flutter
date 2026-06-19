@@ -12,7 +12,7 @@ Future<void> showProductAttributeBottomSheet({
   required BuildContext context,
   required ProductDetailController controller,
   required String title,
-  required VoidCallback onTap,
+  required Future<bool> Function() onTap,
 }) {
   return showModalBottomSheet(
     isScrollControlled: true,
@@ -37,7 +37,7 @@ class ProductAttributeBottomSheet extends StatelessWidget {
 
   final ProductDetailController controller;
   final String title;
-  final VoidCallback onTap;
+  final Future<bool> Function() onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +68,12 @@ class ProductAttributeBottomSheet extends StatelessWidget {
                     textStyle: Styles.normalTextW600(color: ColorName.white),
                     isLoading: controller.cartLoading.value,
                     isDisable: disabled,
-                    onPress: onTap,
+                    onPress: () async {
+                      final success = await onTap();
+                      if (success && context.mounted) {
+                        Navigator.of(context).pop();
+                      }
+                    },
                   );
                 },
               ),
@@ -167,7 +172,6 @@ class _ProductAttributeList extends StatelessWidget {
                 attributeId: attribute.id!,
                 value: value,
               );
-              controller.printSelected();
             },
           );
         });

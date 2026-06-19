@@ -9,9 +9,10 @@ import 'package:project_shop/data/response_models/products/product_attribute_mod
 import 'package:project_shop/data/response_models/products/product_rating_model.dart';
 import 'package:project_shop/data/response_models/products/products_model.dart';
 import 'package:project_shop/data/secure_storage/secure_storage.dart';
+import 'package:project_shop/features/account/account_controller.dart';
 import 'package:project_shop/features/cart/cart_controller.dart';
 import 'package:project_shop/features/wishlist/wish_list_controller.dart';
-import 'package:project_shop/routes/app_routes.dart';
+import 'package:project_shop/features/products/products_detail/widget/edit_rating_dialog.dart';
 import 'package:project_shop/widgets/appbar_custom/common_snackbar.dart';
 import 'package:project_shop/widgets/common/toast_widget.dart';
 
@@ -54,7 +55,6 @@ class ProductDetailController extends BaseController {
   final RxBool ratingLoading = false.obs;
   final RxBool ratingSubmitting = false.obs;
   final RxBool ratingDeleting = false.obs;
-  final RxnInt currentUserId = RxnInt();
   final RxInt quantity = 1.obs;
   final RxDouble selectedRating = 5.0.obs;
   final TextEditingController ratingNameController = TextEditingController();
@@ -178,6 +178,13 @@ class ProductDetailController extends BaseController {
     }
   }
 
+  Future<void> onRefresh() async {
+    await Future.wait([
+      getProductDetail(_currentProductId),
+      getProductRatings(),
+    ]);
+  }
+
   void selectAttribute({
     required int attributeId,
     required int value,
@@ -215,23 +222,10 @@ class ProductDetailController extends BaseController {
     );
   }
 
-  Future<void> loadCurrentUserId() async {
-    final token = await secureStorage.getAccessToken();
-    if (token == null || token.isEmpty) {
-      currentUserId.value = null;
-      return;
-    }
-
-    try {
-      final response = await apiService.getCurrentUser();
-      currentUserId.value = response.data?.id;
-    } catch (_) {
-      currentUserId.value = null;
-    }
-  }
-
   bool canManageRating(ProductRatingModel rating) {
-    final userId = currentUserId.value;
+    final userId = Get.isRegistered<AccountController>()
+        ? Get.find<AccountController>().user.value?.id
+        : null;
     return userId != null && rating.userId == userId;
   }
 
@@ -240,93 +234,26 @@ class ProductDetailController extends BaseController {
     final ratingId = rating.id;
     if (id == null || ratingId == null) return;
 
-    final nameController = TextEditingController(text: rating.fullname ?? '');
-    final phoneController = TextEditingController(text: rating.phone ?? '');
-    final commentController = TextEditingController(text: rating.comment ?? '');
-    final selectedValue = rating.ratingValue.obs;
-
     await Get.dialog<void>(
-      AlertDialog(
-        title: const Text('Sửa đánh giá'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Obx(
-                () => Row(
-                  children: List.generate(5, (index) {
-                    final value = index + 1;
-                    return IconButton(
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(
-                        minHeight: 36,
-                        minWidth: 36,
-                      ),
-                      icon: Icon(
-                        Icons.star,
-                        color: value <= selectedValue.value
-                            ? Colors.amber
-                            : Colors.grey,
-                      ),
-                      onPressed: () {
-                        selectedValue.value = value;
-                      },
-                    );
-                  }),
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Họ tên'),
-              ),
-              TextField(
-                controller: phoneController,
-                decoration: const InputDecoration(labelText: 'Số điện thoại'),
-              ),
-              TextField(
-                controller: commentController,
-                minLines: 3,
-                maxLines: 5,
-                decoration: const InputDecoration(labelText: 'Nội dung'),
-              ),
-            ],
-          ),
+      EditRatingDialog(
+        rating: rating,
+        isSubmitting: ratingSubmitting,
+        onSave: ({
+          required fullname,
+          required phone,
+          required comment,
+          required ratingValue,
+        }) =>
+            updateRating(
+          productId: id,
+          ratingId: ratingId,
+          fullname: fullname,
+          phone: phone,
+          comment: comment,
+          ratingValue: ratingValue,
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('Huỷ'),
-          ),
-          Obx(
-            () => TextButton(
-              onPressed: ratingSubmitting.value
-                  ? null
-                  : () => updateRating(
-                        productId: id,
-                        ratingId: ratingId,
-                        fullname: nameController.text.trim(),
-                        phone: phoneController.text.trim(),
-                        comment: commentController.text.trim(),
-                        ratingValue: selectedValue.value,
-                      ),
-              child: ratingSubmitting.value
-                  ? const SizedBox(
-                      height: 18,
-                      width: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('Lưu'),
-            ),
-          ),
-        ],
       ),
     );
-
-    nameController.dispose();
-    phoneController.dispose();
-    commentController.dispose();
   }
 
   Future<void> updateRating({
@@ -361,7 +288,7 @@ class ProductDetailController extends BaseController {
       },
       (_) async {
         Get.back();
-        Get.snackbar('Danh gia', 'Da cap nhat danh gia.');
+        Get.snackbar('Đánh giá', 'Cập nhật đánh giá thành công.');
         await getProductRatings();
       },
     );
@@ -374,10 +301,10 @@ class ProductDetailController extends BaseController {
     if (id == null || ratingId == null) return;
 
     await Get.defaultDialog<void>(
-      title: 'Xoa danh gia',
-      middleText: 'Ban co chac muon xoa danh gia nay?',
-      textCancel: 'Huy',
-      textConfirm: 'Xoa',
+      title: 'Xoá đánh giá',
+      middleText: 'Bạn có chắc muốn xoá đánh giá này?',
+      textCancel: 'Huỷ',
+      textConfirm: 'Xoá',
       confirmTextColor: Colors.white,
       onConfirm: () async {
         Get.back();
@@ -392,10 +319,10 @@ class ProductDetailController extends BaseController {
         await _productsRepository.deleteProductRating(productId, ratingId);
     response.fold(
       (error) {
-        Get.snackbar('Danh gia', error.message);
+        Get.snackbar('Đánh giá', error.message);
       },
       (_) async {
-        Get.snackbar('Danh gia', 'Da xoa danh gia.');
+        Get.snackbar('Đánh giá', 'Đã xoá đánh giá.');
         await getProductRatings();
       },
     );
@@ -427,14 +354,14 @@ class ProductDetailController extends BaseController {
 
     response.fold(
       (error) {
-        Get.snackbar('Danh gia', error.message);
+        Get.snackbar('Đánh giá', error.message);
       },
       (_) async {
         ratingNameController.clear();
         ratingPhoneController.clear();
         ratingCommentController.clear();
         selectedRating.value = 5.0;
-        Get.snackbar('Danh gia', 'Da gui danh gia sản phẩm.');
+        Get.snackbar('Đánh giá', 'Đã gửi đánh giá sản phẩm.');
         await getProductRatings();
       },
     );
@@ -448,7 +375,7 @@ class ProductDetailController extends BaseController {
   void increaseQuantity() {
     final stock = selectedStockQuantity;
     if (stock != null && quantity.value >= stock) {
-      Get.snackbar('San pham', 'So luong ton kho khong du.');
+      Get.snackbar('Sản phẩm', 'Số lượng tồn kho không đủ.');
       return;
     }
 
@@ -475,44 +402,44 @@ class ProductDetailController extends BaseController {
   }
 
   String get cartSelectionButtonTitle {
-    if (!_hasSelectedAllAttributes) return 'Chon phan loai';
-    if (hasVariants && !selectedVariantCanBuy) return 'Het hang';
+    if (!_hasSelectedAllAttributes) return 'Chọn phân loại';
+    if (hasVariants && !selectedVariantCanBuy) return 'Hết hàng';
     return '';
   }
 
-  Future<void> addToCart({bool goToCart = false}) async {
+  Future<bool> addToCart() async {
     final product = productDetail;
-    if (product?.id == null) return;
+    if (product?.id == null) return false;
 
     if (!await _ensureLoggedIn()) {
-      return;
+      return false;
     }
 
     if (!_hasSelectedAllAttributes) {
       Get.find<ToastWidget>().showToast(
         Get.context!,
         toastStatus: ToastStatus.warning,
-        description: 'Vui long chon day du phan loai san pham.',
+        description: 'Vui lòng chọn đầy đủ phân loại sản phẩm.',
       );
-      return;
+      return false;
     }
 
     if (hasVariants && selectedVariant == null) {
       Get.find<ToastWidget>().showToast(
         Get.context!,
         toastStatus: ToastStatus.warning,
-        description: 'To hop phan loai san pham khong ton tai.',
+        description: 'Tổ hợp phân loại sản phẩm không tồn tại.',
       );
-      return;
+      return false;
     }
 
     if (!selectedVariantCanBuy) {
       Get.find<ToastWidget>().showToast(
         Get.context!,
         toastStatus: ToastStatus.warning,
-        description: 'Phan loai san pham nay dang het hang hoac tam ngung ban.',
+        description: 'Phân loại sản phẩm này đang hết hàng hoặc tạm ngừng bán.',
       );
-      return;
+      return false;
     }
 
     cartLoading.value = true;
@@ -533,18 +460,14 @@ class ProductDetailController extends BaseController {
         toastStatus: ToastStatus.success,
         description: 'Đã thêm sản phẩm vào giỏ hàng.',
       );
-      if (Get.isBottomSheetOpen == true) {
-        Get.back();
-      }
-      if (goToCart) {
-        Get.toNamed(Routes.cart);
-      }
+      return true;
     } catch (error) {
       Get.find<ToastWidget>().showToast(
         Get.context!,
         toastStatus: ToastStatus.fail,
-        description: 'Khong the them san pham vao gio hang.',
+        description: 'Không thể thêm sản phẩm vào giỏ hàng.',
       );
+      return false;
     } finally {
       cartLoading.value = false;
     }
@@ -565,12 +488,9 @@ class ProductDetailController extends BaseController {
     return false;
   }
 
-  void printSelected() {}
-
   @override
   void onReady() {
     getProductDetail(productId);
-    loadCurrentUserId();
     getProductRatings();
     super.onReady();
   }

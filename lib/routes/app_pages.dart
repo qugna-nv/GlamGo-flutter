@@ -126,7 +126,7 @@ class AppPages {
       name: Routes.accountDetails,
       binding: BindingsBuilder(() {
         if (!Get.isRegistered<AccountController>()) {
-          Get.lazyPut(() => AccountController());
+          Get.lazyPut(() => AccountController(), fenix: true);
         }
         Get.lazyPut(() => AccountDetailController());
       }),

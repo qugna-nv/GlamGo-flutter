@@ -44,18 +44,13 @@ class PaymentDeepLinkService extends GetxService {
             : 'order');
     final success = status == 'success';
     final message = uri.queryParameters['message'] ??
-        (success ? 'Thanh toan thanh cong.' : 'Thanh toan chua thanh cong.');
+        (success ? 'Thanh toán thành công.' : 'Thanh toán thất bại.');
 
     if (type == 'wallet') {
-      _refreshAccount();
-      if (Get.currentRoute == Routes.accountDetails) {
-        Get.until((route) => route.settings.name == Routes.accountDetails);
-      } else {
-        _openFromMain(Routes.accountDetails);
-      }
+      _returnToAccountDetails();
     } else {
       _refreshCartAndOrders();
-      _openFromMain(Routes.orders);
+      _openPreservingStack(Routes.orders);
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -83,15 +78,45 @@ class PaymentDeepLinkService extends GetxService {
     }
   }
 
-  void _refreshAccount() {
+  Future<void> _refreshAccount({bool force = false}) async {
     if (Get.isRegistered<AccountController>()) {
-      Get.find<AccountController>().loadCurrentUser();
+      await Get.find<AccountController>().loadCurrentUser(force: force);
     }
   }
 
-  void _openFromMain(String route) {
-    Get.offAllNamed(Routes.initPage);
+  void _returnToAccountDetails() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final navigator = Get.key.currentState;
+      var foundAccountDetails = false;
+
+      if (navigator != null) {
+        navigator.popUntil((route) {
+          final isAccountDetails = route.settings.name == Routes.accountDetails;
+          if (isAccountDetails) {
+            foundAccountDetails = true;
+          }
+
+          return isAccountDetails || route.isFirst;
+        });
+      }
+
+      if (!foundAccountDetails && Get.currentRoute != Routes.accountDetails) {
+        await Get.toNamed(Routes.accountDetails);
+      }
+
+      await _refreshAccount(force: true);
+    });
+  }
+
+  void _openPreservingStack(String route) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.currentRoute == route) return;
+
+      if (Get.currentRoute == Routes.checkout) {
+        Get.offNamed(route);
+        return;
+      }
+
       Get.toNamed(route);
     });
   }

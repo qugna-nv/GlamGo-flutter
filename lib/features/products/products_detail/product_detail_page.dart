@@ -4,6 +4,7 @@ import 'package:project_shop/features/products/products_detail/product_detail_co
 import 'package:project_shop/features/products/products_detail/widget/product_attribute_bottom_sheet.dart';
 import 'package:project_shop/features/products/products_detail/widget/section_widget/product_gallary_section.dart';
 import 'package:project_shop/features/products/products_detail/widget/section_widget/product_info_section.dart';
+import 'package:project_shop/features/products/products_detail/widget/section_widget/product_variant_section.dart';
 import 'package:project_shop/features/products/products_detail/widget/section_widget/rating_section.dart';
 import 'package:project_shop/features/products/products_detail/widget/section_widget/similer_product_section.dart';
 import 'package:project_shop/gen/assets.gen.dart';
@@ -27,31 +28,37 @@ class ProductDetailPage extends GetView<ProductDetailController> {
               label: 'Chi tiết sản phẩm',
               action: _cartAction(),
             ),
-            body: SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(6, 0, 6, 60),
-              child: Obx(() {
-                return controller.isLoading.value
-                    ? ShimmerProductDetail()
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ProductGallerySection(
-                            controller: controller,
-                          ),
-                          const SizedBox(height: 50),
-                          ProductInfoSection(
-                            product: controller.productDetail,
-                          ),
-                          SizedBox(height: 12),
-                          SimilarProductsSection(
-                            products:
-                                controller.productDetail?.sameCategory ?? [],
-                          ),
-                          SizedBox(height: 12),
-                          RatingSection(controller: controller),
-                        ],
-                      );
-              }),
+            body: RefreshIndicator(
+              onRefresh: controller.onRefresh,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: EdgeInsets.fromLTRB(6, 0, 6, 60),
+                child: Obx(() {
+                  return controller.isLoading.value
+                      ? ShimmerProductDetail()
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ProductGallerySection(
+                              controller: controller,
+                            ),
+                            const SizedBox(height: 50),
+                            ProductInfoSection(
+                              product: controller.productDetail,
+                            ),
+                            SizedBox(height: 12),
+                            ProductVariantSection(controller: controller),
+                            SizedBox(height: 12),
+                            SimilarProductsSection(
+                              products:
+                                  controller.productDetail?.sameCategory ?? [],
+                            ),
+                            SizedBox(height: 12),
+                            RatingSection(controller: controller),
+                          ],
+                        );
+                }),
+              ),
             ),
           ),
           Positioned(
@@ -74,14 +81,11 @@ class ProductDetailPage extends GetView<ProductDetailController> {
                     radius: 50,
                     textStyle: Styles.normalTextW500(color: ColorName.black),
                     textColor: ColorName.black,
-                    onPress: () async {
-                      await showProductAttributeBottomSheet(
-                        context: context,
-                        controller: controller,
-                        title: 'Mua ngay',
-                        onTap: () => controller.addToCart(goToCart: true),
-                      );
-                    },
+                    onPress: () => _handleCartAction(
+                      context: context,
+                      title: 'Mua ngay',
+                      goToCart: true,
+                    ),
                   )),
                   SizedBox(width: 24),
                   Expanded(
@@ -90,14 +94,10 @@ class ProductDetailPage extends GetView<ProductDetailController> {
                       color: ColorName.black,
                       radius: 50,
                       textStyle: Styles.normalTextW500(color: ColorName.white),
-                      onPress: () async {
-                        await showProductAttributeBottomSheet(
-                          context: context,
-                          controller: controller,
-                          title: 'Thêm vào giỏ',
-                          onTap: () => controller.addToCart(),
-                        );
-                      },
+                      onPress: () => _handleCartAction(
+                        context: context,
+                        title: 'Thêm vào giỏ',
+                      ),
                     ),
                   ),
                 ],
@@ -107,6 +107,36 @@ class ProductDetailPage extends GetView<ProductDetailController> {
         ],
       ),
     );
+  }
+
+  Future<void> _handleCartAction({
+    required BuildContext context,
+    required String title,
+    bool goToCart = false,
+  }) async {
+    if (controller.canSubmitCartSelection) {
+      final success = await controller.addToCart();
+      if (success && goToCart) {
+        Get.toNamed(Routes.cart);
+      }
+      return;
+    }
+
+    var shouldGoToCart = false;
+    await showProductAttributeBottomSheet(
+      context: context,
+      controller: controller,
+      title: title,
+      onTap: () async {
+        final success = await controller.addToCart();
+        shouldGoToCart = success;
+        return success;
+      },
+    );
+
+    if (shouldGoToCart && goToCart) {
+      Get.toNamed(Routes.cart);
+    }
   }
 
   Widget _cartAction() {

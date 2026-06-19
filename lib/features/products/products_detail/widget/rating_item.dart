@@ -99,7 +99,7 @@ class _RatingUserInfo extends StatelessWidget {
           const SizedBox(width: 4),
           PopupMenuButton<String>(
             padding: EdgeInsets.zero,
-            icon: Icon(Icons.more_vert, size: 20, color: ColorName.grey45),
+            icon: Icon(Icons.more_horiz, size: 22, color: ColorName.grey45),
             onSelected: (value) {
               if (value == 'edit') {
                 onEdit?.call();
@@ -111,11 +111,23 @@ class _RatingUserInfo extends StatelessWidget {
             itemBuilder: (_) => const [
               PopupMenuItem(
                 value: 'edit',
-                child: Text('Sua'),
+                child: Row(
+                  children: [
+                    Icon(Icons.edit_outlined, size: 18),
+                    SizedBox(width: 8),
+                    Text('Sửa'),
+                  ],
+                ),
               ),
               PopupMenuItem(
                 value: 'delete',
-                child: Text('Xoa'),
+                child: Row(
+                  children: [
+                    Icon(Icons.delete_outline, size: 18),
+                    SizedBox(width: 8),
+                    Text('Xoá'),
+                  ],
+                ),
               ),
             ],
           ),

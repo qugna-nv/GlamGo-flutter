@@ -23,7 +23,7 @@ extension PaymentMethodExtension on PaymentMethod {
       case PaymentMethod.wallet:
         return 'Ví Go';
       case PaymentMethod.bankTransfer:
-        return 'Chuyển khoản';
+        return 'Thanh toán VNPay';
     }
   }
 
@@ -34,7 +34,7 @@ extension PaymentMethodExtension on PaymentMethod {
       case PaymentMethod.wallet:
         return 'Thanh toán bằng số dư trong ví tài khoản.';
       case PaymentMethod.bankTransfer:
-        return 'Chuyển khoản theo thông tin của cửa hàng.';
+        return 'Thanh toán qua VNPay.';
     }
   }
 

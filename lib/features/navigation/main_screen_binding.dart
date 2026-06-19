@@ -24,7 +24,9 @@ class MainScreenBinding extends Bindings {
     // Get.put(HomeController());
     Get.lazyPut(() => CategoryController());
     Get.lazyPut(() => WishListController());
-    Get.lazyPut(() => AccountController());
+    if (!Get.isRegistered<AccountController>()) {
+      Get.put(AccountController(), permanent: true);
+    }
     Get.lazyPut(() => ArticleController());
   }
 }
